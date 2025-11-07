@@ -159,12 +159,11 @@ defmodule LLMDb.ConsumerFilteringTest do
                end)
       end
 
-      # Override at runtime to allow Opus models instead
+      # Override at runtime to allow Opus/Sonnet models instead
       {:ok, _snapshot} =
         LLMDb.load(
-          runtime_overrides: %{
-            filter: %{allow: %{anthropic: ["claude-3-opus-*", "claude-3.5-sonnet-*"]}, deny: %{}}
-          }
+          allow: %{anthropic: ["claude-3-opus-*", "claude-3.5-sonnet-*"]},
+          deny: %{}
         )
 
       # Now Opus/Sonnet visible, Haiku not

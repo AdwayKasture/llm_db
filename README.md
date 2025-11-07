@@ -115,7 +115,7 @@ See the full function docs in [hexdocs](https://hexdocs.pm/llm_db).
 
 ## Configuration
 
-The packaged snapshot loads automatically at app start. Optional runtime filters and preferences:
+The packaged snapshot loads automatically at app start. Optional runtime filters, preferences, and custom providers:
 
 ```elixir
 # config/runtime.exs
@@ -124,7 +124,17 @@ config :llm_db,
     allow: :all,                     # :all or %{provider => [patterns]}
     deny: %{openai: ["*-preview"]}   # deny patterns override allow
   },
-  prefer: [:openai, :anthropic]      # provider preference order
+  prefer: [:openai, :anthropic],     # provider preference order
+  custom: %{
+    local: [
+      name: "Local Provider",
+      base_url: "http://localhost:8080",
+      models: %{
+        "llama-3" => %{capabilities: %{chat: true}},
+        "mistral-7b" => %{capabilities: %{chat: true, tools: %{enabled: true}}}
+      }
+    ]
+  }
 ```
 
 ### Filter Examples
@@ -149,10 +159,49 @@ config :llm_db,
 
 # Runtime override (widen/narrow filters without rebuild)
 {:ok, _snapshot} = LLMDb.load(
-  runtime_overrides: %{
-    filter: %{allow: %{openai: ["gpt-4o-*"]}, deny: %{}}
-  }
+  allow: %{openai: ["gpt-4o-*"]},
+  deny: %{}
 )
+```
+
+### Custom Providers
+
+Add local or private models to the catalog:
+
+```elixir
+# config/runtime.exs
+config :llm_db,
+  custom: %{
+    # Provider ID as key
+    local: [
+      name: "Local LLM Provider",
+      base_url: "http://localhost:8080",
+      env: ["LOCAL_API_KEY"],
+      doc: "http://localhost:8080/docs",
+      models: %{
+        "llama-3-8b" => %{
+          name: "Llama 3 8B",
+          family: "llama-3",
+          capabilities: %{chat: true, tools: %{enabled: true}},
+          limits: %{context: 8192, output: 2048},
+          cost: %{input: 0.0, output: 0.0}
+        },
+        "mistral-7b" => %{
+          capabilities: %{chat: true}
+        }
+      }
+    ],
+    myprovider: [
+      name: "My Custom Provider",
+      models: %{
+        "custom-model" => %{capabilities: %{chat: true}}
+      }
+    ]
+  }
+
+# Use custom models like any other
+{:ok, model} = LLMDb.model("local:llama-3-8b")
+{:ok, {provider, id}} = LLMDb.select(require: [chat: true], prefer: [:local, :openai])
 ```
 
 **Filter Rules:**

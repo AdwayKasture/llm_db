@@ -51,15 +51,33 @@ defmodule LLMDb.Config do
 
   ## Configuration Format
 
-  Use the `:filter` key (singular) with `:allow` and `:deny` nested maps:
-
       config :llm_db,
-        filter: %{
-          allow: %{anthropic: ["claude-3-haiku-*"]},
-          deny: %{}
+        allow: :all,  # or [:openai, :anthropic] or %{openai: ["gpt-4*"]}
+        deny: %{},    # or [:provider] or %{provider: ["pattern"]}
+        prefer: [:openai, :anthropic],
+        custom: %{
+          local: [
+            name: "Local Provider",
+            base_url: "http://localhost:8080",
+            models: %{
+              "llama-3" => %{capabilities: %{chat: true}},
+              "mistral-7b" => %{capabilities: %{chat: true, tools: %{enabled: true}}}
+            }
+          ],
+          custom_provider: [
+            name: "My Custom Provider",
+            models: %{
+              "model-1" => %{capabilities: %{chat: true}}
+            }
+          ]
         }
 
   Provider keys can be atoms or strings. Patterns support glob syntax with `*` wildcards.
+
+  Custom providers are defined with provider ID as key, and a keyword list containing:
+  - `:name` - Provider name (optional)
+  - `:base_url` - Base URL for API (optional)
+  - `:models` - Map of model ID to model config
 
   ## Returns
 
@@ -68,21 +86,23 @@ defmodule LLMDb.Config do
   - `:allow` - Allow patterns (`:all` or `%{provider => [patterns]}`)
   - `:deny` - Deny patterns (`%{provider => [patterns]}`)
   - `:prefer` - List of preferred provider atoms
+  - `:custom` - Custom providers map (provider_id => provider_config)
   """
   @spec get() :: map()
   def get do
     config = Application.get_all_env(:llm_db)
 
-    # Read filter config (singular key)
+    # Support both new top-level keys and legacy :filter key
     filter = Keyword.get(config, :filter, %{}) || %{}
-    allow = Map.get(filter, :allow, :all)
-    deny = Map.get(filter, :deny, %{})
+    allow = Keyword.get(config, :allow, Map.get(filter, :allow, :all))
+    deny = Keyword.get(config, :deny, Map.get(filter, :deny, %{}))
 
     %{
       compile_embed: Keyword.get(config, :compile_embed, false),
       allow: allow,
       deny: deny,
-      prefer: Keyword.get(config, :prefer, [])
+      prefer: Keyword.get(config, :prefer, []),
+      custom: Keyword.get(config, :custom, %{})
     }
   end
 

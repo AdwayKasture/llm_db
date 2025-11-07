@@ -1,29 +1,113 @@
 defmodule LLMDb.Runtime do
   @moduledoc """
-  Runtime filtering and preference updates without running the full Engine.
+  Runtime configuration compilation for consumer applications.
 
-  Apply runtime overrides to an existing snapshot:
-  - Recompile and reapply filters (allow/deny patterns)
-  - Update provider preferences
+  Phase 2 of LLMDb: Compile runtime configuration by merging application
+  environment config with per-call options, enabling consumers to:
+  - Filter models by provider/model patterns (allow/deny)
+  - Define provider preferences
+  - Add custom providers/models
 
-  Unlike the full Engine pipeline, this does not add new providers/models,
-  run normalization/validation, or modify provider/model data.
+  This module handles the consumer-facing runtime configuration that gets
+  applied when loading the packaged snapshot into the Store.
 
   ## Example
 
-      snapshot = LLMDb.Store.snapshot()
-      overrides = %{
-        filter: %{
-          allow: %{openai: ["gpt-4"]},
-          deny: %{}
-        },
-        prefer: [:openai, :anthropic]
-      }
+      # Compile runtime config from app env + per-call opts
+      runtime = LLMDb.Runtime.compile(
+        allow: [:openai, :anthropic],
+        custom: %{
+          providers: [%{id: :myprov, name: "My Provider"}],
+          models: [%{provider: :myprov, id: "my-model", capabilities: %{chat: true}}]
+        }
+      )
 
-      {:ok, updated_snapshot} = LLMDb.Runtime.apply(snapshot, overrides)
+      # Runtime config can then be used to filter and customize the catalog
   """
 
-  alias LLMDb.{Config, Engine}
+  alias LLMDb.Config
+
+  require Logger
+
+  @doc """
+  Compiles runtime configuration by merging app env and per-call options.
+
+  Merges application environment configuration (from `config :llm_db, ...`) with
+  options passed at load time, normalizes the configuration, and compiles filters.
+
+  ## Parameters
+
+  - `opts` - Keyword list of per-call options that override app env:
+    - `:allow` - `:all`, list of providers `[:openai]`, or map `%{openai: :all | [patterns]}`
+    - `:deny` - List of providers `[:provider]` or map `%{provider: [patterns]}`
+    - `:prefer` - List of provider atoms in preference order
+    - `:custom` - Map with provider IDs as keys, provider configs (with models) as values
+    - `:provider_ids` - Optional list of known provider IDs for validation
+
+  ## Returns
+
+  Map with compiled runtime configuration:
+  - `:filters` - Compiled allow/deny patterns
+  - `:prefer` - Provider preference list
+  - `:custom` - Normalized custom providers/models (%{providers: [...], models: [...]})
+  - `:unknown` - List of unknown providers in filters (for warnings)
+
+  ## Examples
+
+      # Simple provider allow list
+      runtime = Runtime.compile(allow: [:openai, :anthropic])
+      runtime.filters.allow
+      #=> %{openai: :all, anthropic: :all}
+
+      # Provider allow list with model patterns
+      runtime = Runtime.compile(
+        allow: %{openai: ["gpt-4*"], anthropic: :all},
+        deny: %{openai: ["gpt-4-0613"]}
+      )
+
+      # With custom providers
+      runtime = Runtime.compile(
+        custom: %{
+          local: [
+            name: "Local Provider",
+            models: %{
+              "llama-3" => %{capabilities: %{chat: true}}
+            }
+          ]
+        }
+      )
+  """
+  @spec compile(keyword()) :: map()
+  def compile(opts \\ []) do
+    # Get base config from app env
+    base = Config.get()
+
+    # Normalize and merge options
+    allow = normalize_allow(Keyword.get(opts, :allow, base.allow))
+    deny = normalize_deny(Keyword.get(opts, :deny, base.deny))
+    prefer = Keyword.get(opts, :prefer, base.prefer) || []
+    custom = normalize_custom(Keyword.get(opts, :custom, %{}))
+    provider_ids = Keyword.get(opts, :provider_ids)
+
+    # Compile filters (deferred if provider_ids not provided)
+    {filters, unknown: unknown} =
+      if provider_ids do
+        Config.compile_filters(allow, deny, provider_ids)
+      else
+        # Compile without validation, will recompile later with known providers
+        Config.compile_filters(allow, deny, nil)
+      end
+
+    %{
+      filters: filters,
+      prefer: prefer,
+      custom: custom,
+      unknown: unknown,
+      # Keep raw patterns for digest calculation
+      raw_allow: allow,
+      raw_deny: deny
+    }
+  end
 
   @doc """
   Applies runtime overrides to an existing snapshot.
@@ -53,6 +137,79 @@ defmodule LLMDb.Runtime do
         {:error, reason}
     end
   end
+
+  # Private helpers
+
+  # Normalize :allow from various formats to canonical form
+  defp normalize_allow(:all), do: :all
+
+  defp normalize_allow(allow) when is_list(allow) do
+    # Convert [:openai, :anthropic] to %{openai: :all, anthropic: :all}
+    Map.new(allow, fn provider -> {provider, :all} end)
+  end
+
+  defp normalize_allow(allow) when is_map(allow), do: allow
+  defp normalize_allow(nil), do: :all
+
+  # Normalize :deny from various formats to canonical form
+  defp normalize_deny(deny) when is_list(deny) do
+    # Convert [:openai] to %{openai: :all}
+    Map.new(deny, fn provider -> {provider, :all} end)
+  end
+
+  defp normalize_deny(deny) when is_map(deny), do: deny
+  defp normalize_deny(nil), do: %{}
+
+  # Normalize custom overlay from new format to internal format
+  # New format: %{provider_id: [name: "...", models: %{id => config}]}
+  # Internal format: %{providers: [...], models: [...]}
+  defp normalize_custom(custom) when is_map(custom) and map_size(custom) > 0 do
+    {providers, models} =
+      Enum.reduce(custom, {[], []}, fn {provider_id, provider_config},
+                                       {acc_providers, acc_models} ->
+        # Normalize provider_id to atom
+        provider_atom =
+          case provider_id do
+            id when is_atom(id) -> id
+            id when is_binary(id) -> String.to_atom(id)
+          end
+
+        # Extract provider fields (only include non-nil values)
+        provider_map =
+          %{id: provider_atom}
+          |> maybe_put(:name, Keyword.get(provider_config, :name))
+          |> maybe_put(:base_url, Keyword.get(provider_config, :base_url))
+          |> maybe_put(:env, Keyword.get(provider_config, :env))
+          |> maybe_put(:config_schema, Keyword.get(provider_config, :config_schema))
+          |> maybe_put(:doc, Keyword.get(provider_config, :doc))
+          |> maybe_put(:extra, Keyword.get(provider_config, :extra))
+
+        # Extract models
+        provider_models =
+          case Keyword.get(provider_config, :models) do
+            models when is_map(models) ->
+              Enum.map(models, fn {model_id, model_config} ->
+                Map.merge(model_config, %{
+                  id: model_id,
+                  provider: provider_atom
+                })
+              end)
+
+            _ ->
+              []
+          end
+
+        {[provider_map | acc_providers], provider_models ++ acc_models}
+      end)
+
+    %{providers: Enum.reverse(providers), models: Enum.reverse(models)}
+  end
+
+  defp normalize_custom(_), do: %{providers: [], models: []}
+
+  # Helper to conditionally add non-nil values to a map
+  defp maybe_put(map, _key, nil), do: map
+  defp maybe_put(map, key, value), do: Map.put(map, key, value)
 
   defp validate_and_prepare_overrides(nil), do: {:ok, %{}}
   defp validate_and_prepare_overrides(overrides) when overrides == %{}, do: {:ok, %{}}

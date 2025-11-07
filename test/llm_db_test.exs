@@ -129,7 +129,7 @@ defmodule LLMDbTest do
     end
 
     test "provider/0 returns sorted provider structs" do
-      providers = LLMDb.provider()
+      providers = LLMDb.providers()
 
       assert is_list(providers)
       assert length(providers) > 0
@@ -140,11 +140,11 @@ defmodule LLMDbTest do
 
     test "provider/0 returns empty list when not loaded" do
       Store.clear!()
-      assert LLMDb.provider() == []
+      assert LLMDb.providers() == []
     end
 
     test "provider/1 returns provider metadata" do
-      providers = LLMDb.provider()
+      providers = LLMDb.providers()
       provider_id = hd(providers).id
 
       {:ok, provider_data} = LLMDb.provider(provider_id)
@@ -154,12 +154,12 @@ defmodule LLMDbTest do
     end
 
     test "provider/1 returns :error for unknown provider" do
-      assert :error = LLMDb.provider(:nonexistent)
+      assert {:error, :not_found} = LLMDb.provider(:nonexistent)
     end
 
     test "provider/1 returns :error when not loaded" do
       Store.clear!()
-      assert :error = LLMDb.provider(:openai)
+      assert {:error, :not_found} = LLMDb.provider(:openai)
     end
   end
 
@@ -170,7 +170,7 @@ defmodule LLMDbTest do
     end
 
     test "models/1 returns all models for provider" do
-      providers = LLMDb.provider()
+      providers = LLMDb.providers()
 
       if providers != [] do
         provider_id = hd(providers).id
@@ -183,7 +183,7 @@ defmodule LLMDbTest do
     end
 
     test "models/1 with manual filtering by required capabilities" do
-      providers = LLMDb.provider()
+      providers = LLMDb.providers()
 
       if providers != [] do
         provider_id = hd(providers).id
@@ -204,7 +204,7 @@ defmodule LLMDbTest do
     end
 
     test "models/1 with manual filtering by forbidden capabilities" do
-      providers = LLMDb.provider()
+      providers = LLMDb.providers()
 
       if providers != [] do
         provider_id = hd(providers).id
@@ -226,7 +226,7 @@ defmodule LLMDbTest do
     end
 
     test "models/1 with manual filtering combining require and forbid" do
-      providers = LLMDb.provider()
+      providers = LLMDb.providers()
 
       if providers != [] do
         provider_id = hd(providers).id
@@ -261,7 +261,7 @@ defmodule LLMDbTest do
     end
 
     test "model/2 returns model by provider and id" do
-      providers = LLMDb.provider()
+      providers = LLMDb.providers()
 
       if providers != [] do
         provider_id = hd(providers).id
@@ -279,7 +279,7 @@ defmodule LLMDbTest do
     end
 
     test "model/2 resolves aliases" do
-      providers = LLMDb.provider()
+      providers = LLMDb.providers()
 
       if providers != [] do
         provider_id = hd(providers).id
@@ -313,7 +313,7 @@ defmodule LLMDbTest do
     end
 
     test "capabilities/1 with tuple spec returns capabilities or nil" do
-      providers = LLMDb.provider()
+      providers = LLMDb.providers()
 
       if providers != [] do
         provider_id = hd(providers).id
@@ -332,7 +332,7 @@ defmodule LLMDbTest do
     end
 
     test "capabilities/1 with string spec returns capabilities or nil" do
-      providers = LLMDb.provider()
+      providers = LLMDb.providers()
 
       if providers != [] do
         provider_id = hd(providers).id
@@ -598,7 +598,7 @@ defmodule LLMDbTest do
     end
 
     test "model/1 parses provider:model format" do
-      providers = LLMDb.provider()
+      providers = LLMDb.providers()
 
       if providers != [] do
         provider_id = hd(providers).id
@@ -625,7 +625,7 @@ defmodule LLMDbTest do
     end
 
     test "model/2 resolves model by provider and id" do
-      providers = LLMDb.provider()
+      providers = LLMDb.providers()
 
       if providers != [] do
         provider_id = hd(providers).id
@@ -642,7 +642,7 @@ defmodule LLMDbTest do
     end
 
     test "model/2 resolves alias to canonical model" do
-      providers = LLMDb.provider()
+      providers = LLMDb.providers()
 
       if providers != [] do
         provider_id = hd(providers).id
@@ -664,7 +664,7 @@ defmodule LLMDbTest do
     end
 
     test "model/1 with string spec resolves model" do
-      providers = LLMDb.provider()
+      providers = LLMDb.providers()
 
       if providers != [] do
         provider_id = hd(providers).id
@@ -878,7 +878,7 @@ defmodule LLMDbTest do
 
       assert is_map(snapshot)
 
-      providers = LLMDb.provider()
+      providers = LLMDb.providers()
       provider_ids = Enum.map(providers, & &1.id)
       assert :provider_a in provider_ids
       assert :provider_b in provider_ids
@@ -980,8 +980,8 @@ defmodule LLMDbTest do
     test "handles snapshot not loaded" do
       Store.clear!()
 
-      assert LLMDb.provider() == []
-      assert LLMDb.provider(:openai) == :error
+      assert LLMDb.providers() == []
+      assert LLMDb.provider(:openai) == {:error, :not_found}
       assert LLMDb.models(:openai) == []
       assert LLMDb.model(:openai, "gpt-4") == {:error, :not_found}
       assert LLMDb.capabilities({:openai, "gpt-4"}) == nil

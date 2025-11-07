@@ -187,19 +187,21 @@ defmodule LLMDb.APITest do
       ]
 
       # Set deny filter to deny the canonical ID
-      Application.put_env(:llm_db, :filter, %{
+      app_config = %{
         allow: :all,
-        deny: %{openai: ["gpt-4o"]}
-      })
+        deny: %{openai: ["gpt-4o"]},
+        prefer: []
+      }
 
-      app_config = LLMDb.Config.get()
       provider_ids = Enum.map(providers, & &1.id)
 
       {filters, _unknown_info} =
         LLMDb.Config.compile_filters(app_config.allow, app_config.deny, provider_ids)
 
-      # Don't filter - we want the model in the catalog to test allowed?/1 filtering
-      indexes = LLMDb.Index.build(providers, models)
+      # Apply filters - model should be filtered out
+      filtered_models = LLMDb.Engine.apply_filters(models, filters)
+
+      indexes = LLMDb.Index.build(providers, filtered_models)
 
       snapshot = %{
         providers_by_id: indexes.providers_by_id,
@@ -221,9 +223,8 @@ defmodule LLMDb.APITest do
     end
 
     test "resolves aliases when checking allowed" do
-      # The alias should be denied because it resolves to the canonical ID
+      # Both the alias and canonical ID should be denied (filtered out at load time)
       refute LLMDb.allowed?({:openai, "gpt-4-omni"})
-      # The canonical ID is denied
       refute LLMDb.allowed?({:openai, "gpt-4o"})
     end
   end

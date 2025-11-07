@@ -152,7 +152,9 @@ defmodule Mix.Tasks.LlmDb.Build do
 
     module_path = "lib/llm_db/generated/valid_providers.ex"
     File.mkdir_p!(Path.dirname(module_path))
-    formatted = Code.format_string!(module_code)
-    File.write!(module_path, formatted)
+    formatted = Code.format_string!(module_code) |> IO.iodata_to_binary()
+    # Ensure file ends with newline (Elixir convention)
+    content = if String.ends_with?(formatted, "\n"), do: formatted, else: formatted <> "\n"
+    File.write!(module_path, content)
   end
 end

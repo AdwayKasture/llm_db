@@ -10,14 +10,26 @@ Query, filter, and access LLM model metadata at runtime.
 # Defaults
 {:ok, snapshot} = LLMDb.load()
 
-# Runtime overrides
+# With filters and preferences
 {:ok, snapshot} = LLMDb.load(
-  runtime_overrides: %{
-    filter: %{
-      allow: %{openai: :all, anthropic: ["claude-3*"]},
-      deny: %{openai: ["*-deprecated"]}
-    },
-    prefer: [:anthropic, :openai]
+  allow: %{openai: :all, anthropic: ["claude-3*"]},
+  deny: %{openai: ["*-deprecated"]},
+  prefer: [:anthropic, :openai]
+)
+
+# With custom providers
+{:ok, snapshot} = LLMDb.load(
+  custom: %{
+    local: [
+      name: "Local Provider",
+      base_url: "http://localhost:8080",
+      models: %{
+        "llama-3" => %{
+          capabilities: %{chat: true, tools: %{enabled: true}},
+          limits: %{context: 8192, output: 2048}
+        }
+      }
+    ]
   }
 )
 ```
@@ -214,23 +226,71 @@ LLMDb.Spec.parse_provider("unknown")  # => {:error, :unknown_provider}
 {:ok, {:openai, "gpt-4"}} = LLMDb.Spec.parse_spec("openai:gpt-4")
 ```
 
-## Runtime Overrides
+## Custom Providers
 
-Runtime overrides **only** affect filters and preferences, not provider/model data.
+Add local or private models to the catalog at load time:
 
 ```elixir
 {:ok, _} = LLMDb.load(
-  runtime_overrides: %{
-    filter: %{allow: %{openai: ["gpt-4*"]}, deny: %{}},
-    prefer: [:openai]
+  custom: %{
+    local: [
+      name: "Local LLM Server",
+      base_url: "http://localhost:8080",
+      env: ["LOCAL_API_KEY"],
+      models: %{
+        "llama-3-8b" => %{
+          name: "Llama 3 8B",
+          family: "llama-3",
+          capabilities: %{chat: true, tools: %{enabled: true}},
+          limits: %{context: 8192, output: 2048},
+          cost: %{input: 0.0, output: 0.0}
+        },
+        "mistral-7b" => %{
+          capabilities: %{chat: true}
+        }
+      }
+    ],
+    openrouter: [
+      name: "OpenRouter",
+      base_url: "https://openrouter.ai/api/v1",
+      models: %{
+        "custom/model" => %{capabilities: %{chat: true}}
+      }
+    ]
   }
+)
+
+# Use custom models
+{:ok, model} = LLMDb.model("local:llama-3-8b")
+{:ok, {provider, id}} = LLMDb.select(require: [tools: true], prefer: [:local])
+```
+
+**Custom Provider Format:**
+- Each provider is a top-level key under `:custom`
+- Provider config is a keyword list with optional `:name`, `:base_url`, `:env`, `:doc`, `:extra`
+- `:models` is required - a map where keys are model IDs and values are model configs
+- Models inherit the provider ID automatically
+- Custom providers/models merge with packaged data (last wins by ID)
+
+## Load Options
+
+All options passed to `LLMDb.load/1`:
+
+```elixir
+{:ok, _} = LLMDb.load(
+  allow: %{openai: ["gpt-4*"]},
+  deny: %{openai: ["*-preview"]},
+  prefer: [:openai, :anthropic],
+  custom: %{local: [models: %{"llama-3" => %{capabilities: %{chat: true}}}]}
 )
 ```
 
-Triggers `LLMDb.Runtime.apply/2`:
-1. Recompiles filter patterns
-2. Rebuilds indexes (excludes filtered models)
-3. Stores snapshot with epoch + 1
+These options override application config from `config :llm_db, ...` and trigger:
+1. Filter pattern compilation
+2. Custom provider/model merging
+3. Filter application
+4. Index rebuilding
+5. Store update with epoch + 1
 
 ## Recipes
 
