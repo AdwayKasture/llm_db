@@ -18,12 +18,6 @@ defmodule LLMDb.Application do
       {:ok, _snapshot} ->
         {:ok, self()}
 
-      {:error, :no_snapshot} ->
-        require Logger
-        Logger.warning("LLMDb: no snapshot found; starting with empty catalog")
-        LLMDb.load_empty()
-        {:ok, self()}
-
       {:error, reason} ->
         {:error, reason}
     end

@@ -284,8 +284,8 @@ defmodule LLMDb.Loader do
 
   defp merge_custom({providers, models}, custom) do
     # Normalize custom providers and models
-    custom_providers = normalize_providers(custom.providers || [])
-    custom_models = normalize_models(custom.models || [])
+    custom_providers = normalize_providers(custom.providers)
+    custom_models = normalize_models(custom.models)
 
     # Merge providers (last wins by ID)
     merged_providers = Merge.merge_providers(providers, custom_providers)
@@ -376,6 +376,4 @@ defmodule LLMDb.Loader do
       inspect(filter)
     end
   end
-
-  defp summarize_filter(other), do: inspect(other)
 end
