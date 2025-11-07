@@ -178,7 +178,19 @@ defmodule LLMDb.Engine do
         }
       end)
 
-    {:ok, %{providers: providers, models: models}}
+    # Collect exclude_models from all providers
+    excludes =
+      Enum.reduce(providers, %{}, fn provider, acc ->
+        case Map.get(provider, :exclude_models) do
+          models when is_list(models) -> Map.put(acc, provider.id, models)
+          _ -> acc
+        end
+      end)
+
+    # Apply excludes to models
+    filtered_models = Merge.merge_models(models, [], excludes)
+
+    {:ok, %{providers: providers, models: filtered_models}}
   end
 
   # Stage 5: Finalize (Enrich → Nest)

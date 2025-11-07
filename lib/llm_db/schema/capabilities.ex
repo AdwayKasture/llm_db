@@ -29,9 +29,15 @@ defmodule LLMDb.Schema.Capabilities do
                       tool_calls: Zoi.boolean() |> Zoi.optional()
                     })
 
+  @embeddings_schema Zoi.object(%{
+                       min_dimensions: Zoi.integer() |> Zoi.min(1) |> Zoi.optional(),
+                       max_dimensions: Zoi.integer() |> Zoi.min(1) |> Zoi.optional(),
+                       default_dimensions: Zoi.integer() |> Zoi.min(1) |> Zoi.optional()
+                     })
+
   @schema Zoi.object(%{
             chat: Zoi.boolean() |> Zoi.default(true),
-            embeddings: Zoi.boolean() |> Zoi.default(false),
+            embeddings: Zoi.union([Zoi.boolean(), @embeddings_schema]) |> Zoi.default(false),
             reasoning: @reasoning_schema |> Zoi.default(%{enabled: false}),
             tools:
               @tools_schema

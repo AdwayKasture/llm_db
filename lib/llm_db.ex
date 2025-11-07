@@ -107,6 +107,25 @@ defmodule LLMDb do
     end
   end
 
+  @doc """
+  Loads an empty catalog with no providers or models.
+
+  This is used as a fallback when no packaged snapshot is available,
+  allowing the application to start successfully. The catalog can
+  later be populated via `load/1` once a snapshot is available.
+
+  ## Examples
+
+      LLMDb.load_empty()
+      #=> {:ok, %{providers: [], models: %{}, ...}}
+  """
+  @spec load_empty(keyword()) :: {:ok, map()}
+  def load_empty(opts \\ []) do
+    {:ok, snapshot} = build_runtime_snapshot([], [])
+    Store.put!(snapshot, opts)
+    {:ok, snapshot}
+  end
+
   defp load_packaged_snapshot do
     case Packaged.snapshot() do
       nil ->

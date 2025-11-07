@@ -5,12 +5,14 @@ config :llm_db,
   # Default sources for loading model metadata (first = lowest precedence, last = highest)
   sources: [
     {LLMDb.Sources.ModelsDev, %{}},
+    {LLMDb.Sources.OpenRouter, %{}},
     {LLMDb.Sources.Local, %{dir: "priv/llm_db/local"}},
     {LLMDb.Sources.Config, %{overrides: Application.compile_env(:llm_db, :overrides, %{})}}
   ],
 
   # Cache directory for remote sources
   models_dev_cache_dir: "priv/llm_db/upstream",
+  openrouter_cache_dir: "priv/llm_db/upstream",
   upstream_cache_dir: "priv/llm_db/upstream"
 
 if Mix.env() == :dev do

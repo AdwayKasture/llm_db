@@ -12,14 +12,27 @@
 - **Dependencies**: `mix deps.get`
 - **Release**: `mix llm_db.version && mix git_ops.release && git push && git push --tags` (bumps to date-based version, updates CHANGELOG, tags, and pushes)
 
-## Production Configuration
+## Configuration
 
-For production deployments, use compile-time embedded snapshot to eliminate runtime atom creation and file I/O:
+### Development/Test (default in dev.exs and test.exs)
+
+```elixir
+config :llm_db,
+  compile_embed: false,     # Load from file at runtime
+  integrity_policy: :warn   # Warn on hash mismatch instead of failing
+```
+
+With `:warn` policy, snapshot regeneration via `mix llm_db.build` triggers automatic recompilation on next `mix test` or `mix compile` - no need for manual `mix clean`.
+
+### Production
+
+Use compile-time embedded snapshot to eliminate runtime atom creation and file I/O:
 
 ```elixir
 # config/prod.exs
 config :llm_db,
-  compile_embed: true,
+  compile_embed: true,       # Embed snapshot at compile time
+  integrity_policy: :strict, # Fail on any hash mismatch (default)
   filter: %{
     allow: :all,  # or restrict to specific providers
     deny: %{}

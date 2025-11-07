@@ -1,24 +1,10 @@
-# GPT-4o Mini Model Definition
 id = "gpt-4o-mini"
-name = "GPT-4o Mini"
-family = "gpt-4"
-release_date = "2024-07-18"
-knowledge = "2023-10"
 
-[limits]
-context = 128000
-output = 16384
-
-[cost]
-input = 0.15
-output = 0.60
-
-[modalities]
-input = ["text", "image"]
-output = ["text"]
+[capabilities.json]
+schema = true
 
 [capabilities.tools]
-enabled = true
+strict = true
 
-[capabilities.streaming]
-text = true
+[extra]
+api = "chat"

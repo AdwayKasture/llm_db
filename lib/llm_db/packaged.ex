@@ -20,19 +20,30 @@ defmodule LLMDb.Packaged do
   Production deployments should use `compile_embed: true` to eliminate runtime atom
   creation and file I/O. Runtime mode includes SHA-256 integrity verification to
   prevent tampering with the snapshot file.
+
+  ### Integrity Policy
+
+  The `:integrity_policy` config option controls integrity check behavior:
+  - `:strict` (default) - Fail on hash mismatch, treating it as tampering
+  - `:warn` - Log warning and continue, useful in dev when snapshot regenerates frequently
+  - `:off` - Skip mismatch warnings entirely
+
+  In development, use `:warn` mode. The snapshot file is marked as an `@external_resource`,
+  so Mix automatically recompiles the module when it changes, refreshing the hash.
   """
 
   require Logger
-  import Bitwise
 
   @snapshot_filename "priv/llm_db/snapshot.json"
+  @compile_path Path.join([Application.app_dir(:llm_db), @snapshot_filename])
+
+  # Always mark snapshot as external resource so Mix recompiles when it changes
+  @external_resource @compile_path
 
   # Compile-time integrity hash (computed only if file exists at compile time)
   @snapshot_sha (
-                  compile_path = Path.join([Application.app_dir(:llm_db), @snapshot_filename])
-
-                  if File.exists?(compile_path) do
-                    compile_path
+                  if File.exists?(@compile_path) do
+                    @compile_path
                     |> File.read!()
                     |> then(&:crypto.hash(:sha256, &1))
                     |> Base.encode16(case: :lower)
@@ -109,6 +120,10 @@ defmodule LLMDb.Packaged do
       end
     end
 
+    defp integrity_policy do
+      Application.get_env(:llm_db, :integrity_policy, :strict)
+    end
+
     if is_nil(@snapshot_sha) do
       defp verify_integrity(_content), do: :ok
     else
@@ -119,27 +134,39 @@ defmodule LLMDb.Packaged do
           |> then(&:crypto.hash(:sha256, &1))
           |> Base.encode16(case: :lower)
 
-        if secure_compare(@expected_hash, computed_hash) do
-          :ok
-        else
-          {:error, :tampered}
+        cond do
+          secure_compare(@expected_hash, computed_hash) ->
+            :ok
+
+          integrity_policy() in [:warn, :off] ->
+            Logger.warning(
+              "llm_db: snapshot integrity mismatch (expected #{String.slice(@expected_hash, 0..7)}..., got #{String.slice(computed_hash, 0..7)}...). " <>
+                "Treating as stale in #{integrity_policy()} mode. If you just ran `mix llm_db.build`, " <>
+                "this is expected; the module will auto-recompile on next build."
+            )
+
+            :ok
+
+          true ->
+            {:error, :tampered}
         end
       end
+
+      # Constant-time string comparison to prevent timing attacks
+      defp secure_compare(a, b) when byte_size(a) == byte_size(b) do
+        import Bitwise
+        a_bytes = :binary.bin_to_list(a)
+        b_bytes = :binary.bin_to_list(b)
+
+        result =
+          Enum.zip(a_bytes, b_bytes)
+          |> Enum.reduce(0, fn {x, y}, acc -> acc ||| bxor(x, y) end)
+
+        result == 0
+      end
+
+      defp secure_compare(_, _), do: false
     end
-
-    # Constant-time string comparison to prevent timing attacks
-    defp secure_compare(a, b) when byte_size(a) == byte_size(b) do
-      a_bytes = :binary.bin_to_list(a)
-      b_bytes = :binary.bin_to_list(b)
-
-      result =
-        Enum.zip(a_bytes, b_bytes)
-        |> Enum.reduce(0, fn {x, y}, acc -> acc ||| Bitwise.bxor(x, y) end)
-
-      result == 0
-    end
-
-    defp secure_compare(_, _), do: false
 
     defp validate_schema(snapshot) when is_map(snapshot) do
       # Lightweight schema checks to prevent atom/memory exhaustion

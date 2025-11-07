@@ -12,6 +12,7 @@ defmodule LLMDb.Schema.Provider do
             base_url: Zoi.string() |> Zoi.optional(),
             env: Zoi.array(Zoi.string()) |> Zoi.optional(),
             doc: Zoi.string() |> Zoi.optional(),
+            exclude_models: Zoi.array(Zoi.string()) |> Zoi.default([]) |> Zoi.optional(),
             extra: Zoi.map() |> Zoi.optional()
           })
 

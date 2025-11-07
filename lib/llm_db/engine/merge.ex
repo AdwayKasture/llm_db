@@ -66,6 +66,15 @@ defmodule LLMDb.Merge do
     |> Map.values()
   end
 
+  defp provider_merge_resolver(:exclude_models, left_val, right_val)
+       when is_list(left_val) and is_list(right_val) do
+    # For exclude_models: don't blow away excludes with an empty list
+    case right_val do
+      [] -> left_val
+      _ -> right_val
+    end
+  end
+
   defp provider_merge_resolver(_key, left_val, right_val)
        when is_list(left_val) and is_list(right_val) do
     # For lists: replace (right wins)

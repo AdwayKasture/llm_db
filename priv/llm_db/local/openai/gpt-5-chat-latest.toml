@@ -1,0 +1,14 @@
+id = "gpt-5-chat-latest"
+
+[capabilities.reasoning]
+enabled = false
+
+[capabilities.tools]
+enabled = false
+
+[capabilities.json]
+schema = true
+
+[extra]
+api = "responses"
+temperature = true

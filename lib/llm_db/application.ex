@@ -12,8 +12,17 @@ defmodule LLMDb.Application do
   @impl true
   def start(_type, _args) do
     case LLMDb.load() do
-      {:ok, _snapshot} -> {:ok, self()}
-      {:error, reason} -> {:error, reason}
+      {:ok, _snapshot} ->
+        {:ok, self()}
+
+      {:error, :no_snapshot} ->
+        require Logger
+        Logger.warning("LLMDb: no snapshot found; starting with empty catalog")
+        LLMDb.load_empty()
+        {:ok, self()}
+
+      {:error, reason} ->
+        {:error, reason}
     end
   end
 end
