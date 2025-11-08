@@ -1,7 +1,7 @@
-defmodule LLMDb.SpecTest do
+defmodule LLMDB.SpecTest do
   use ExUnit.Case, async: false
 
-  alias LLMDb.{Spec, Store}
+  alias LLMDB.{Spec, Store}
 
   setup do
     Store.clear!()

@@ -11,7 +11,7 @@ LLM model metadata catalog with fast, capability-aware lookups. Use simple `"pro
 
 ## Installation
 
-Model metadata is refreshed regularly, so versions follow a date-based format (`YYYY.MM.DD`):
+Model metadata is refreshed regularly, so versions follow [CalVer](https://calver.org/) (`YYYY.M.Patch` with no leading zeros):
 
 ```elixir
 def deps do
@@ -32,35 +32,35 @@ Both formats are automatically recognized and work interchangeably. Use the `@` 
 Tuples `{:provider_atom, "id"}` also work, but prefer the string spec.
 
 ```elixir
-{:ok, model} = LLMDb.model("openai:gpt-4o-mini")
-#=> %LLMDb.Model{id: "gpt-4o-mini", provider: :openai, ...}
+{:ok, model} = LLMDB.model("openai:gpt-4o-mini")
+#=> %LLMDB.Model{id: "gpt-4o-mini", provider: :openai, ...}
 
-{:ok, model} = LLMDb.model("gpt-4o-mini@openai")
-#=> %LLMDb.Model{id: "gpt-4o-mini", provider: :openai, ...}
+{:ok, model} = LLMDB.model("gpt-4o-mini@openai")
+#=> %LLMDB.Model{id: "gpt-4o-mini", provider: :openai, ...}
 ```
 
 ## Quick Start
 
 ```elixir
 # Get a model and read metadata
-{:ok, model} = LLMDb.model("openai:gpt-4o-mini")
+{:ok, model} = LLMDB.model("openai:gpt-4o-mini")
 model.capabilities.tools.enabled  #=> true
 model.cost.input                  #=> 0.15  (per 1M tokens)
 model.limits.context              #=> 128_000
 
 # Select a model by capabilities (returns {provider, id})
-{:ok, {provider, id}} = LLMDb.select(
+{:ok, {provider, id}} = LLMDB.select(
   require: [chat: true, tools: true, json_native: true],
   prefer:  [:openai, :anthropic]
 )
-{:ok, model} = LLMDb.model({provider, id})
+{:ok, model} = LLMDB.model({provider, id})
 
 # List providers
-LLMDb.providers()
-#=> [%LLMDb.Provider{id: :anthropic, ...}, %LLMDb.Provider{id: :openai, ...}]
+LLMDB.providers()
+#=> [%LLMDB.Provider{id: :anthropic, ...}, %LLMDB.Provider{id: :openai, ...}]
 
 # Check availability (allow/deny filters)
-LLMDb.allowed?("openai:gpt-4o-mini") #=> true
+LLMDB.allowed?("openai:gpt-4o-mini") #=> true
 ```
 
 ## API Cheatsheet
@@ -90,7 +90,7 @@ See the full function docs in [hexdocs](https://hexdocs.pm/llm_db).
 ### Provider
 
 ```elixir
-%LLMDb.Provider{
+%LLMDB.Provider{
   id: :openai,
   name: "OpenAI",
   base_url: "https://api.openai.com",
@@ -103,7 +103,7 @@ See the full function docs in [hexdocs](https://hexdocs.pm/llm_db).
 ### Model
 
 ```elixir
-%LLMDb.Model{
+%LLMDB.Model{
   id: "gpt-4o-mini",
   provider: :openai,
   name: "GPT-4o mini",
@@ -168,7 +168,7 @@ config :llm_db,
   }
 
 # Runtime override (widen/narrow filters without rebuild)
-{:ok, _snapshot} = LLMDb.load(
+{:ok, _snapshot} = LLMDB.load(
   allow: %{openai: ["gpt-4o-*"]},
   deny: %{}
 )
@@ -210,8 +210,8 @@ config :llm_db,
   }
 
 # Use custom models like any other
-{:ok, model} = LLMDb.model("local:llama-3-8b")
-{:ok, {provider, id}} = LLMDb.select(require: [chat: true], prefer: [:local, :openai])
+{:ok, model} = LLMDB.model("local:llama-3-8b")
+{:ok, {provider, id}} = LLMDB.select(require: [chat: true], prefer: [:local, :openai])
 ```
 
 **Filter Rules:**

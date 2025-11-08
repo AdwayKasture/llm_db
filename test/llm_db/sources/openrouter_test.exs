@@ -1,7 +1,7 @@
-defmodule LLMDb.Sources.OpenRouterTest do
+defmodule LLMDB.Sources.OpenRouterTest do
   use ExUnit.Case, async: false
 
-  alias LLMDb.Sources.OpenRouter
+  alias LLMDB.Sources.OpenRouter
 
   setup do
     # Clean up test cache directory

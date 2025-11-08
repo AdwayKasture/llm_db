@@ -138,7 +138,7 @@ The Local source uses the **canonical schema** directly (after atomizing keys). 
 ```elixir
 config :llm_db,
   sources: [
-    {LLMDb.Sources.Local, %{dir: "priv/llm_db/local"}},
+    {LLMDB.Sources.Local, %{dir: "priv/llm_db/local"}},
     # ... other sources
   ]
 ```

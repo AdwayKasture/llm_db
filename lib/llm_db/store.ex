@@ -1,4 +1,4 @@
-defmodule LLMDb.Store do
+defmodule LLMDB.Store do
   @moduledoc """
   Manages persistent_term storage for LLM model snapshots with atomic swaps.
 
@@ -110,13 +110,13 @@ defmodule LLMDb.Store do
 
   List of Provider structs, or empty list if no snapshot.
   """
-  @spec providers() :: [LLMDb.Provider.t()]
+  @spec providers() :: [LLMDB.Provider.t()]
   def providers do
     case snapshot() do
       %{providers: providers} when is_list(providers) ->
         Enum.map(providers, fn
-          %LLMDb.Provider{} = p -> p
-          provider -> LLMDb.Provider.new!(provider)
+          %LLMDB.Provider{} = p -> p
+          provider -> LLMDB.Provider.new!(provider)
         end)
 
       _ ->
@@ -136,13 +136,13 @@ defmodule LLMDb.Store do
   - `{:ok, provider}` - Provider found
   - `{:error, :not_found}` - Provider not found
   """
-  @spec provider(atom()) :: {:ok, LLMDb.Provider.t()} | {:error, :not_found}
+  @spec provider(atom()) :: {:ok, LLMDB.Provider.t()} | {:error, :not_found}
   def provider(provider_id) when is_atom(provider_id) do
     case snapshot() do
       %{providers_by_id: providers_by_id} ->
         case Map.get(providers_by_id, provider_id) do
           nil -> {:error, :not_found}
-          provider -> {:ok, LLMDb.Provider.new!(provider)}
+          provider -> {:ok, LLMDB.Provider.new!(provider)}
         end
 
       _ ->
@@ -161,15 +161,15 @@ defmodule LLMDb.Store do
 
   List of Model structs for the provider, or empty list if provider not found.
   """
-  @spec models(atom()) :: [LLMDb.Model.t()]
+  @spec models(atom()) :: [LLMDB.Model.t()]
   def models(provider_id) when is_atom(provider_id) do
     case snapshot() do
       %{models: models_by_provider} ->
         models_by_provider
         |> Map.get(provider_id, [])
         |> Enum.map(fn
-          %LLMDb.Model{} = m -> m
-          model -> LLMDb.Model.new!(model)
+          %LLMDB.Model{} = m -> m
+          model -> LLMDB.Model.new!(model)
         end)
 
       _ ->
@@ -192,7 +192,7 @@ defmodule LLMDb.Store do
   - `{:ok, model}` - Model found
   - `{:error, :not_found}` - Model not found
   """
-  @spec model(atom(), String.t()) :: {:ok, LLMDb.Model.t()} | {:error, :not_found}
+  @spec model(atom(), String.t()) :: {:ok, LLMDB.Model.t()} | {:error, :not_found}
   def model(provider_id, model_id) when is_atom(provider_id) and is_binary(model_id) do
     case snapshot() do
       %{models_by_key: models_by_key, aliases_by_key: aliases_by_key} ->
@@ -213,19 +213,19 @@ defmodule LLMDb.Store do
                   nil ->
                     {:error, :not_found}
 
-                  %LLMDb.Model{} = m ->
+                  %LLMDB.Model{} = m ->
                     {:ok, m}
 
                   model ->
-                    {:ok, LLMDb.Model.new!(model)}
+                    {:ok, LLMDB.Model.new!(model)}
                 end
             end
 
-          %LLMDb.Model{} = m ->
+          %LLMDB.Model{} = m ->
             {:ok, m}
 
           model ->
-            {:ok, LLMDb.Model.new!(model)}
+            {:ok, LLMDB.Model.new!(model)}
         end
 
       _ ->

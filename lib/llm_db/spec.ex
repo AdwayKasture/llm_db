@@ -1,4 +1,4 @@
-defmodule LLMDb.Spec do
+defmodule LLMDB.Spec do
   @moduledoc """
   Canonical "provider:model" spec parsing and resolution.
 
@@ -23,15 +23,15 @@ defmodule LLMDb.Spec do
   are supported. The region prefix is stripped for catalog lookup but preserved in the returned
   model ID. For example:
 
-      iex> LLMDb.Spec.resolve("bedrock:us.anthropic.claude-opus-4-1-20250805-v1:0")
-      {:ok, {:bedrock, "us.anthropic.claude-opus-4-1-20250805-v1:0", %LLMDb.Model{}}}
+      iex> LLMDB.Spec.resolve("bedrock:us.anthropic.claude-opus-4-1-20250805-v1:0")
+      {:ok, {:bedrock, "us.anthropic.claude-opus-4-1-20250805-v1:0", %LLMDB.Model{}}}
 
   The lookup uses "anthropic.claude-opus-4-1-20250805-v1:0" to find metadata, but the returned
   model ID retains the "us." prefix for API routing purposes.
   """
 
-  alias LLMDb.{Normalize, Store}
-  alias LLMDb.Model
+  alias LLMDB.{Normalize, Store}
+  alias LLMDB.Model
 
   # Valid Bedrock inference profile region prefixes
   @bedrock_prefixes ~w(us. eu. ap. ca. global.)
@@ -54,13 +54,13 @@ defmodule LLMDb.Spec do
 
   ## Examples
 
-      iex> LLMDb.Spec.parse_provider(:openai)
+      iex> LLMDB.Spec.parse_provider(:openai)
       {:ok, :openai}
 
-      iex> LLMDb.Spec.parse_provider("google-vertex")
+      iex> LLMDB.Spec.parse_provider("google-vertex")
       {:ok, :google_vertex}
 
-      iex> LLMDb.Spec.parse_provider("nonexistent")
+      iex> LLMDB.Spec.parse_provider("nonexistent")
       {:error, :unknown_provider}
   """
   @spec parse_provider(atom() | binary()) ::
@@ -102,19 +102,19 @@ defmodule LLMDb.Spec do
 
   ## Examples
 
-      iex> LLMDb.Spec.parse_spec("openai:gpt-4")
+      iex> LLMDB.Spec.parse_spec("openai:gpt-4")
       {:ok, {:openai, "gpt-4"}}
 
-      iex> LLMDb.Spec.parse_spec("gpt-4@openai")
+      iex> LLMDB.Spec.parse_spec("gpt-4@openai")
       {:ok, {:openai, "gpt-4"}}
 
-      iex> LLMDb.Spec.parse_spec("google-vertex:gemini-pro")
+      iex> LLMDB.Spec.parse_spec("google-vertex:gemini-pro")
       {:ok, {:google_vertex, "gemini-pro"}}
 
-      iex> LLMDb.Spec.parse_spec("provider:model@ambiguous", format: :colon)
+      iex> LLMDB.Spec.parse_spec("provider:model@ambiguous", format: :colon)
       {:ok, {:provider, "model@ambiguous"}}
 
-      iex> LLMDb.Spec.parse_spec("gpt-4")
+      iex> LLMDB.Spec.parse_spec("gpt-4")
       {:error, :invalid_format}
   """
   @spec parse_spec(String.t() | {atom(), String.t()}, keyword()) ::
@@ -164,10 +164,10 @@ defmodule LLMDb.Spec do
 
   ## Examples
 
-      iex> LLMDb.Spec.parse_spec!("openai:gpt-4")
+      iex> LLMDB.Spec.parse_spec!("openai:gpt-4")
       {:openai, "gpt-4"}
 
-      iex> LLMDb.Spec.parse_spec!("gpt-4@openai")
+      iex> LLMDB.Spec.parse_spec!("gpt-4@openai")
       {:openai, "gpt-4"}
   """
   @spec parse_spec!(String.t() | {atom(), String.t()}, keyword()) :: {atom(), String.t()}
@@ -202,13 +202,13 @@ defmodule LLMDb.Spec do
 
   ## Examples
 
-      iex> LLMDb.Spec.format_spec({:openai, "gpt-4"})
+      iex> LLMDB.Spec.format_spec({:openai, "gpt-4"})
       "openai:gpt-4"
 
-      iex> LLMDb.Spec.format_spec({:openai, "gpt-4"}, :model_at_provider)
+      iex> LLMDB.Spec.format_spec({:openai, "gpt-4"}, :model_at_provider)
       "gpt-4@openai"
 
-      iex> LLMDb.Spec.format_spec({:openai, "gpt-4o-mini"}, :filename_safe)
+      iex> LLMDB.Spec.format_spec({:openai, "gpt-4o-mini"}, :filename_safe)
       "gpt-4o-mini@openai"
   """
   @spec format_spec({atom(), String.t()}, atom() | nil) :: String.t()
@@ -245,10 +245,10 @@ defmodule LLMDb.Spec do
 
   ## Examples
 
-      iex> LLMDb.Spec.build_spec("openai:gpt-4", format: :filename_safe)
+      iex> LLMDB.Spec.build_spec("openai:gpt-4", format: :filename_safe)
       "gpt-4@openai"
 
-      iex> LLMDb.Spec.build_spec({:openai, "gpt-4"}, format: :model_at_provider)
+      iex> LLMDB.Spec.build_spec({:openai, "gpt-4"}, format: :model_at_provider)
       "gpt-4@openai"
   """
   @spec build_spec(String.t() | {atom(), String.t()}, keyword()) :: String.t()
@@ -265,13 +265,13 @@ defmodule LLMDb.Spec do
 
   ## Examples
 
-      iex> LLMDb.Spec.normalize_spec("openai:gpt-4")
+      iex> LLMDB.Spec.normalize_spec("openai:gpt-4")
       {:openai, "gpt-4"}
 
-      iex> LLMDb.Spec.normalize_spec("gpt-4@openai")
+      iex> LLMDB.Spec.normalize_spec("gpt-4@openai")
       {:openai, "gpt-4"}
 
-      iex> LLMDb.Spec.normalize_spec({:openai, "gpt-4"})
+      iex> LLMDB.Spec.normalize_spec({:openai, "gpt-4"})
       {:openai, "gpt-4"}
   """
   @spec normalize_spec(String.t() | {atom(), String.t()}) :: {atom(), String.t()}
@@ -374,16 +374,16 @@ defmodule LLMDb.Spec do
 
   ## Examples
 
-      iex> LLMDb.Spec.resolve("openai:gpt-4")
-      {:ok, {:openai, "gpt-4", %LLMDb.Model{}}}
+      iex> LLMDB.Spec.resolve("openai:gpt-4")
+      {:ok, {:openai, "gpt-4", %LLMDB.Model{}}}
 
-      iex> LLMDb.Spec.resolve({:openai, "gpt-4"})
-      {:ok, {:openai, "gpt-4", %LLMDb.Model{}}}
+      iex> LLMDB.Spec.resolve({:openai, "gpt-4"})
+      {:ok, {:openai, "gpt-4", %LLMDB.Model{}}}
 
-      iex> LLMDb.Spec.resolve("gpt-4", scope: :openai)
-      {:ok, {:openai, "gpt-4", %LLMDb.Model{}}}
+      iex> LLMDB.Spec.resolve("gpt-4", scope: :openai)
+      {:ok, {:openai, "gpt-4", %LLMDB.Model{}}}
 
-      iex> LLMDb.Spec.resolve("gpt-4")
+      iex> LLMDB.Spec.resolve("gpt-4")
       {:error, :ambiguous}
   """
   @spec resolve(String.t() | {atom(), String.t()}, keyword()) ::

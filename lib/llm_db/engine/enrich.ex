@@ -1,4 +1,4 @@
-defmodule LLMDb.Enrich do
+defmodule LLMDB.Enrich do
   @moduledoc """
   Lightweight, deterministic enrichment of model data.
 
@@ -16,19 +16,19 @@ defmodule LLMDb.Enrich do
 
   ## Examples
 
-      iex> LLMDb.Enrich.derive_family("gpt-4o-mini")
+      iex> LLMDB.Enrich.derive_family("gpt-4o-mini")
       "gpt-4o"
 
-      iex> LLMDb.Enrich.derive_family("claude-3-opus")
+      iex> LLMDB.Enrich.derive_family("claude-3-opus")
       "claude-3"
 
-      iex> LLMDb.Enrich.derive_family("gemini-1.5-pro")
+      iex> LLMDB.Enrich.derive_family("gemini-1.5-pro")
       "gemini-1.5"
 
-      iex> LLMDb.Enrich.derive_family("single")
+      iex> LLMDB.Enrich.derive_family("single")
       nil
 
-      iex> LLMDb.Enrich.derive_family("two-parts")
+      iex> LLMDB.Enrich.derive_family("two-parts")
       "two"
   """
   @spec derive_family(String.t()) :: String.t() | nil
@@ -57,13 +57,13 @@ defmodule LLMDb.Enrich do
 
   ## Examples
 
-      iex> LLMDb.Enrich.enrich_model(%{id: "gpt-4o-mini", provider: :openai})
+      iex> LLMDB.Enrich.enrich_model(%{id: "gpt-4o-mini", provider: :openai})
       %{id: "gpt-4o-mini", provider: :openai, family: "gpt-4o", provider_model_id: "gpt-4o-mini"}
 
-      iex> LLMDb.Enrich.enrich_model(%{id: "claude-3-opus", provider: :anthropic, family: "claude-3-custom"})
+      iex> LLMDB.Enrich.enrich_model(%{id: "claude-3-opus", provider: :anthropic, family: "claude-3-custom"})
       %{id: "claude-3-opus", provider: :anthropic, family: "claude-3-custom", provider_model_id: "claude-3-opus"}
 
-      iex> LLMDb.Enrich.enrich_model(%{id: "model", provider: :openai, provider_model_id: "custom-id"})
+      iex> LLMDB.Enrich.enrich_model(%{id: "model", provider: :openai, provider_model_id: "custom-id"})
       %{id: "model", provider: :openai, provider_model_id: "custom-id"}
   """
   @spec enrich_model(map()) :: map()
@@ -80,7 +80,7 @@ defmodule LLMDb.Enrich do
 
   ## Examples
 
-      iex> LLMDb.Enrich.enrich_models([
+      iex> LLMDB.Enrich.enrich_models([
       ...>   %{id: "gpt-4o", provider: :openai},
       ...>   %{id: "claude-3-opus", provider: :anthropic}
       ...> ])

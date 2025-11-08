@@ -1,7 +1,7 @@
-defmodule LLMDb.Sources.ModelsDevTest do
+defmodule LLMDB.Sources.ModelsDevTest do
   use ExUnit.Case, async: false
 
-  alias LLMDb.Sources.ModelsDev
+  alias LLMDB.Sources.ModelsDev
 
   setup do
     # Clean up test cache directory

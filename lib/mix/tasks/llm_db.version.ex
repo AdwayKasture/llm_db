@@ -1,4 +1,4 @@
-defmodule Mix.Tasks.LlmDb.Version do
+defmodule Mix.Tasks.LLMDB.Version do
   @moduledoc """
   Updates the version in mix.exs to the current date (YYYY.MM.DD format).
 

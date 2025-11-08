@@ -1,4 +1,4 @@
-defmodule LLMDb.Generated.ValidModalities do
+defmodule LLMDB.Generated.ValidModalities do
   @moduledoc """
   Auto-generated module containing all valid modality atoms.
 

@@ -59,8 +59,8 @@ mix llm_db.build
 ```elixir
 config :llm_db,
   sources: [
-    {LLMDb.Sources.ModelsDev, %{}},                    # From upstream cache
-    {LLMDb.Sources.Local, %{dir: "priv/llm_db"}}      # From TOML files (highest precedence)
+    {LLMDB.Sources.ModelsDev, %{}},                    # From upstream cache
+    {LLMDB.Sources.Local, %{dir: "priv/llm_db"}}      # From TOML files (highest precedence)
   ]
 ```
 
@@ -95,14 +95,14 @@ Runtime operations happen when your application starts or when you manually relo
 # Loads packaged snapshot + optional runtime overrides
 
 # Manual reload
-:ok = LLMDb.reload()
+:ok = LLMDB.reload()
 
 # Check current epoch (increments on each load)
-epoch = LLMDb.epoch()
+epoch = LLMDB.epoch()
 ```
 
 **What happens:**
-1. `LLMDb.Packaged.snapshot()` loads pre-built snapshot from `priv/llm_db/snapshot.json`
+1. `LLMDB.Packaged.snapshot()` loads pre-built snapshot from `priv/llm_db/snapshot.json`
 2. Normalizes provider IDs (string → atom)
 3. Builds runtime indexes
 4. Applies optional runtime overrides (filters, preferences)
@@ -114,16 +114,16 @@ epoch = LLMDb.epoch()
 
 ```elixir
 # Get all providers as Provider structs
-providers = LLMDb.providers()
+providers = LLMDB.providers()
 
 # Get specific provider
-{:ok, provider} = LLMDb.get_provider(:openai)
+{:ok, provider} = LLMDB.get_provider(:openai)
 provider.name        #=> "OpenAI"
 provider.base_url    #=> "https://api.openai.com"
 provider.env         #=> ["OPENAI_API_KEY"]
 
 # List provider IDs only
-provider_ids = LLMDb.list_providers()
+provider_ids = LLMDB.list_providers()
 ```
 
 **Performance:** O(N) where N = number of providers (typically < 20)
@@ -132,10 +132,10 @@ provider_ids = LLMDb.list_providers()
 
 ```elixir
 # Get model by spec string (returns Model struct)
-{:ok, model} = LLMDb.model("openai:gpt-4o-mini")
+{:ok, model} = LLMDB.model("openai:gpt-4o-mini")
 
 # Or by provider and ID
-{:ok, model} = LLMDb.get_model(:openai, "gpt-4o-mini")
+{:ok, model} = LLMDB.get_model(:openai, "gpt-4o-mini")
 
 # Access capabilities
 model.capabilities.tools.enabled    #=> true
@@ -144,10 +144,10 @@ model.cost.input                    #=> 0.15
 model.limits.context                #=> 128000
 
 # List models for a provider (returns maps, not structs)
-models = LLMDb.list_models(:openai)
+models = LLMDB.list_models(:openai)
 
 # Filter by capabilities
-models = LLMDb.list_models(:openai,
+models = LLMDB.list_models(:openai,
   require: [tools: true, json_native: true]
 )
 ```
@@ -160,19 +160,19 @@ models = LLMDb.list_models(:openai,
 
 ```elixir
 # Find best model matching requirements
-{:ok, {provider, model_id}} = LLMDb.select(
+{:ok, {provider, model_id}} = LLMDB.select(
   require: [chat: true, tools: true, json_native: true],
   prefer: [:openai, :anthropic]
 )
 
 # Select from specific provider
-{:ok, {provider, model_id}} = LLMDb.select(
+{:ok, {provider, model_id}} = LLMDB.select(
   require: [tools: true],
   scope: :openai
 )
 
 # Handle no match
-case LLMDb.select(require: [impossible: true]) do
+case LLMDB.select(require: [impossible: true]) do
   {:ok, {provider, model_id}} -> # use model
   {:error, :no_match} -> # fallback
 end
@@ -188,8 +188,8 @@ end
 
 ```elixir
 # Check if model passes allow/deny filters
-true = LLMDb.allowed?({:openai, "gpt-4o-mini"})
-true = LLMDb.allowed?("openai:gpt-4o-mini")
+true = LLMDB.allowed?({:openai, "gpt-4o-mini"})
+true = LLMDB.allowed?("openai:gpt-4o-mini")
 ```
 
 **Performance:** O(1) with pre-compiled regex patterns
@@ -206,9 +206,9 @@ config :llm_db,
 
   # Optional sources (overlay on top of packaged snapshot)
   sources: [
-    {LLMDb.Sources.ModelsDev, %{}},
-    {LLMDb.Sources.Local, %{dir: "priv/llm_db"}},
-    {LLMDb.Sources.Config, %{overrides: %{...}}}
+    {LLMDB.Sources.ModelsDev, %{}},
+    {LLMDB.Sources.Local, %{dir: "priv/llm_db"}},
+    {LLMDB.Sources.Config, %{overrides: %{...}}}
   ],
 
   # Global filters
@@ -246,7 +246,7 @@ config :llm_db,
 ### Provider Struct
 
 ```elixir
-%LLMDb.Provider{
+%LLMDB.Provider{
   id: :openai,
   name: "OpenAI",
   base_url: "https://api.openai.com",
@@ -259,7 +259,7 @@ config :llm_db,
 ### Model Struct
 
 ```elixir
-%LLMDb.Model{
+%LLMDB.Model{
   id: "gpt-4o-mini",
   provider: :openai,
   name: "GPT-4o mini",
@@ -285,7 +285,7 @@ config :llm_db,
 ### Get Model with Fallback
 
 ```elixir
-case LLMDb.model("openai:gpt-4o-mini") do
+case LLMDB.model("openai:gpt-4o-mini") do
   {:ok, model} -> model
   {:error, _} -> get_fallback_model()
 end
@@ -294,26 +294,26 @@ end
 ### Select with Requirements
 
 ```elixir
-{:ok, {provider, id}} = LLMDb.select(
+{:ok, {provider, id}} = LLMDB.select(
   require: [tools: true, streaming_text: true],
   prefer: [:openai, :anthropic]
 )
 
-{:ok, model} = LLMDb.get_model(provider, id)
+{:ok, model} = LLMDB.get_model(provider, id)
 ```
 
 ### Filter by Cost
 
 ```elixir
 cheap_models =
-  LLMDb.list_models(:openai)
+  LLMDB.list_models(:openai)
   |> Enum.filter(fn model -> model.cost.input < 1.0 end)
 ```
 
 ### Check Capability
 
 ```elixir
-{:ok, model} = LLMDb.model("openai:gpt-4o-mini")
+{:ok, model} = LLMDB.model("openai:gpt-4o-mini")
 
 if model.capabilities.tools.enabled do
   # Use tools
@@ -329,7 +329,7 @@ end
 def refresh_models do
   System.cmd("mix", ["llm_db.pull"])
   System.cmd("mix", ["llm_db.build"])
-  LLMDb.reload()
+  LLMDB.reload()
 end
 ```
 
@@ -341,7 +341,7 @@ end
 # WRONG - models don't auto-update
 def get_latest_models do
   # This won't fetch new data
-  LLMDb.providers()
+  LLMDB.providers()
 end
 ```
 
@@ -354,7 +354,7 @@ end
 :persistent_term.get(:llm_db_snapshot)
 ```
 
-**Why:** Use the public API (`LLMDb.snapshot()`) for stability and forward compatibility.
+**Why:** Use the public API (`LLMDB.snapshot()`) for stability and forward compatibility.
 
 ### ❌ Don't Modify Structs Directly
 
@@ -369,11 +369,11 @@ model = %{model | cost: %{input: 0.0, output: 0.0}}
 
 ### Custom Source
 
-Implement `LLMDb.Source` behaviour:
+Implement `LLMDB.Source` behaviour:
 
 ```elixir
 defmodule MyApp.CustomSource do
-  @behaviour LLMDb.Source
+  @behaviour LLMDB.Source
 
   @impl true
   def load(_opts) do
@@ -397,7 +397,7 @@ Configure in `config/config.exs`:
 ```elixir
 config :llm_db,
   sources: [
-    {LLMDb.Sources.ModelsDev, %{}},
+    {LLMDB.Sources.ModelsDev, %{}},
     {MyApp.CustomSource, %{}}
   ]
 ```
@@ -418,7 +418,7 @@ Use the `extra` field:
 }
 
 # At runtime
-{:ok, model} = LLMDb.model("openai:gpt-4o-mini")
+{:ok, model} = LLMDB.model("openai:gpt-4o-mini")
 model.extra.my_custom_tier  #=> "premium"
 ```
 
@@ -448,7 +448,7 @@ model.extra.my_custom_tier  #=> "premium"
 
 ```elixir
 test "works with GPT-4o mini" do
-  {:ok, model} = LLMDb.model("openai:gpt-4o-mini")
+  {:ok, model} = LLMDB.model("openai:gpt-4o-mini")
   assert model.capabilities.tools.enabled
 end
 ```
@@ -457,7 +457,7 @@ end
 
 ```elixir
 test "selects appropriate model" do
-  {:ok, {provider, id}} = LLMDb.select(
+  {:ok, {provider, id}} = LLMDB.select(
     require: [tools: true],
     prefer: [:openai]
   )
@@ -470,8 +470,8 @@ end
 
 ```elixir
 test "respects deny filters" do
-  :ok = LLMDb.load(deny: %{openai: :all})
-  refute LLMDb.allowed?({:openai, "gpt-4o-mini"})
+  :ok = LLMDB.load(deny: %{openai: :all})
+  refute LLMDB.allowed?({:openai, "gpt-4o-mini"})
 end
 ```
 

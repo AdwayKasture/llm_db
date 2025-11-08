@@ -1,8 +1,8 @@
-defmodule LLMDb.Runtime do
+defmodule LLMDB.Runtime do
   @moduledoc """
   Runtime configuration compilation for consumer applications.
 
-  Phase 2 of LLMDb: Compile runtime configuration by merging application
+  Phase 2 of LLMDB: Compile runtime configuration by merging application
   environment config with per-call options, enabling consumers to:
   - Filter models by provider/model patterns (allow/deny)
   - Define provider preferences
@@ -14,7 +14,7 @@ defmodule LLMDb.Runtime do
   ## Example
 
       # Compile runtime config from app env + per-call opts
-      runtime = LLMDb.Runtime.compile(
+      runtime = LLMDB.Runtime.compile(
         allow: [:openai, :anthropic],
         custom: %{
           providers: [%{id: :myprov, name: "My Provider"}],
@@ -25,7 +25,7 @@ defmodule LLMDb.Runtime do
       # Runtime config can then be used to filter and customize the catalog
   """
 
-  alias LLMDb.Config
+  alias LLMDB.Config
 
   require Logger
 
@@ -261,7 +261,7 @@ defmodule LLMDb.Runtime do
   defp maybe_update_filter(snapshot, filter) when map_size(filter) == 0, do: {:ok, snapshot}
 
   defp maybe_update_filter(snapshot, filter) do
-    alias LLMDb.{Config, Engine}
+    alias LLMDB.{Config, Engine}
 
     require Logger
 

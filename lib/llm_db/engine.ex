@@ -1,4 +1,4 @@
-defmodule LLMDb.Engine do
+defmodule LLMDB.Engine do
   @moduledoc """
   Pure ETL pipeline for BUILD-TIME LLM model catalog generation.
 
@@ -31,12 +31,12 @@ defmodule LLMDb.Engine do
 
   **Filtering and indexing are deferred to load-time** - the snapshot contains
   ALL data from sources. Runtime policies (allow/deny patterns, preferences)
-  are applied when the snapshot is loaded via `LLMDb.load/1`.
+  are applied when the snapshot is loaded via `LLMDB.load/1`.
   """
 
   require Logger
 
-  alias LLMDb.{Config, Enrich, Merge, Normalize, Source, Validate}
+  alias LLMDB.{Config, Enrich, Merge, Normalize, Source, Validate}
 
   # List fields that should be unioned when merging models from multiple sources
   @list_union_keys [:aliases, :tags, :input, :output]
@@ -52,7 +52,7 @@ defmodule LLMDb.Engine do
   - `:sources` - List of `{module, opts}` source tuples (optional, defaults to Config.sources!())
 
   Note: `:allow`, `:deny`, `:prefer`, and `:filters` options are ignored.
-  Filtering is a load-time concern applied via `LLMDb.load/1` and runtime config.
+  Filtering is a load-time concern applied via `LLMDB.load/1` and runtime config.
 
   ## Returns
 
@@ -71,7 +71,7 @@ defmodule LLMDb.Engine do
   ```
 
   The snapshot contains ALL models from all sources. Indexes and filters are
-  built at load-time by `LLMDb.load/1` using the `LLMDb.Index` module.
+  built at load-time by `LLMDB.load/1` using the `LLMDB.Index` module.
   """
   @spec run(keyword()) :: {:ok, map()} | {:error, term()}
   def run(opts \\ []) do
@@ -326,7 +326,7 @@ defmodule LLMDb.Engine do
 
   # Deep merge with special list handling
   defp deep_merge_with_list_rules(left, right) when is_map(left) and is_map(right) do
-    LLMDb.DeepMergeShim.deep_merge(left, right, Merge.resolver(union_list_keys: @list_union_keys))
+    LLMDB.DeepMergeShim.deep_merge(left, right, Merge.resolver(union_list_keys: @list_union_keys))
   end
 
   defp matches_patterns?(_model_id, []), do: false

@@ -1,7 +1,7 @@
-defmodule LLMDb.ModelStructAPITest do
+defmodule LLMDB.ModelStructAPITest do
   use ExUnit.Case, async: false
 
-  alias LLMDb.Store
+  alias LLMDB.Store
 
   setup do
     Store.clear!()
@@ -48,23 +48,23 @@ defmodule LLMDb.ModelStructAPITest do
 
   describe "allowed?/1 with Model struct" do
     test "returns true for allowed model struct" do
-      {:ok, model} = LLMDb.model(:openai, "gpt-4o-mini")
-      assert LLMDb.allowed?(model) == true
+      {:ok, model} = LLMDB.model(:openai, "gpt-4o-mini")
+      assert LLMDB.allowed?(model) == true
     end
 
     test "returns true for allowed model - tuple format" do
-      assert LLMDb.allowed?({:openai, "gpt-4o-mini"}) == true
+      assert LLMDB.allowed?({:openai, "gpt-4o-mini"}) == true
     end
 
     test "returns true for allowed model - string format" do
-      assert LLMDb.allowed?("openai:gpt-4o-mini") == true
+      assert LLMDB.allowed?("openai:gpt-4o-mini") == true
     end
   end
 
   describe "capabilities/1 with Model struct" do
     test "returns capabilities from model struct directly" do
-      {:ok, model} = LLMDb.model(:openai, "gpt-4o-mini")
-      caps = LLMDb.capabilities(model)
+      {:ok, model} = LLMDB.model(:openai, "gpt-4o-mini")
+      caps = LLMDB.capabilities(model)
 
       assert caps.chat == true
       assert caps.tools.enabled == true
@@ -72,14 +72,14 @@ defmodule LLMDb.ModelStructAPITest do
     end
 
     test "returns capabilities from tuple format" do
-      caps = LLMDb.capabilities({:openai, "gpt-4o-mini"})
+      caps = LLMDB.capabilities({:openai, "gpt-4o-mini"})
 
       assert caps.chat == true
       assert caps.tools.enabled == true
     end
 
     test "returns capabilities from string format" do
-      caps = LLMDb.capabilities("openai:gpt-4o-mini")
+      caps = LLMDB.capabilities("openai:gpt-4o-mini")
 
       assert caps.chat == true
       assert caps.tools.enabled == true

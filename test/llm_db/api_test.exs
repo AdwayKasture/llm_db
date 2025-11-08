@@ -1,7 +1,7 @@
-defmodule LLMDb.APITest do
+defmodule LLMDB.APITest do
   use ExUnit.Case, async: false
 
-  alias LLMDb.Store
+  alias LLMDB.Store
 
   setup do
     Store.clear!()
@@ -35,13 +35,13 @@ defmodule LLMDb.APITest do
       }
     ]
 
-    app_config = LLMDb.Config.get()
+    app_config = LLMDB.Config.get()
     provider_ids = Enum.map(providers, & &1.id)
 
     {filters, _unknown_info} =
-      LLMDb.Config.compile_filters(app_config.allow, app_config.deny, provider_ids)
+      LLMDB.Config.compile_filters(app_config.allow, app_config.deny, provider_ids)
 
-    filtered_models = LLMDb.Engine.apply_filters(models, filters)
+    filtered_models = LLMDB.Engine.apply_filters(models, filters)
 
     snapshot = %{
       providers_by_id: Map.new(providers, &{&1.id, &1}),
@@ -64,46 +64,46 @@ defmodule LLMDb.APITest do
 
   describe "providers/0" do
     test "returns all providers as list" do
-      providers = LLMDb.providers()
+      providers = LLMDB.providers()
 
       assert is_list(providers)
       assert length(providers) == 2
-      assert Enum.all?(providers, &match?(%LLMDb.Provider{}, &1))
+      assert Enum.all?(providers, &match?(%LLMDB.Provider{}, &1))
       assert Enum.map(providers, & &1.id) |> Enum.sort() == [:anthropic, :openai]
     end
   end
 
   describe "models/0" do
     test "returns all models as list" do
-      models = LLMDb.models()
+      models = LLMDB.models()
 
       assert is_list(models)
       assert length(models) == 3
-      assert Enum.all?(models, &match?(%LLMDb.Model{}, &1))
+      assert Enum.all?(models, &match?(%LLMDB.Model{}, &1))
     end
   end
 
   describe "models/1" do
     test "returns models for specific provider" do
-      openai_models = LLMDb.models(:openai)
+      openai_models = LLMDB.models(:openai)
 
       assert is_list(openai_models)
       assert length(openai_models) == 2
       assert Enum.all?(openai_models, &(&1.provider == :openai))
 
-      anthropic_models = LLMDb.models(:anthropic)
+      anthropic_models = LLMDB.models(:anthropic)
       assert length(anthropic_models) == 1
       assert hd(anthropic_models).provider == :anthropic
     end
 
     test "returns empty list for unknown provider" do
-      assert LLMDb.models(:unknown) == []
+      assert LLMDB.models(:unknown) == []
     end
   end
 
   describe "candidates/1" do
     test "returns all matching models in preference order" do
-      candidates = LLMDb.candidates(require: [chat: true])
+      candidates = LLMDB.candidates(require: [chat: true])
 
       assert is_list(candidates)
       assert length(candidates) >= 3
@@ -111,7 +111,7 @@ defmodule LLMDb.APITest do
     end
 
     test "filters by required capabilities" do
-      candidates = LLMDb.candidates(require: [chat: true, json_native: true])
+      candidates = LLMDB.candidates(require: [chat: true, json_native: true])
 
       assert is_list(candidates)
       # Only OpenAI models have json.native: true in our test data
@@ -119,28 +119,28 @@ defmodule LLMDb.APITest do
     end
 
     test "respects prefer option" do
-      candidates = LLMDb.candidates(require: [chat: true], prefer: [:anthropic])
+      candidates = LLMDB.candidates(require: [chat: true], prefer: [:anthropic])
 
       # First result should be from anthropic if available
       assert match?({:anthropic, _}, hd(candidates))
     end
 
     test "respects scope option" do
-      candidates = LLMDb.candidates(require: [chat: true], scope: :openai)
+      candidates = LLMDB.candidates(require: [chat: true], scope: :openai)
 
       assert length(candidates) == 2
       assert Enum.all?(candidates, fn {provider, _id} -> provider == :openai end)
     end
 
     test "respects forbid option" do
-      candidates = LLMDb.candidates(require: [chat: true], forbid: [json_native: true])
+      candidates = LLMDB.candidates(require: [chat: true], forbid: [json_native: true])
 
       # Should exclude OpenAI models which have json_native: true
       refute Enum.any?(candidates, fn {provider, _id} -> provider == :openai end)
     end
 
     test "returns empty list when no matches" do
-      candidates = LLMDb.candidates(require: [embeddings: true])
+      candidates = LLMDB.candidates(require: [embeddings: true])
 
       assert candidates == []
     end
@@ -148,19 +148,19 @@ defmodule LLMDb.APITest do
 
   describe "parse/1" do
     test "parses valid spec string" do
-      assert {:ok, {:openai, "gpt-4o"}} = LLMDb.parse("openai:gpt-4o")
+      assert {:ok, {:openai, "gpt-4o"}} = LLMDB.parse("openai:gpt-4o")
 
       assert {:ok, {:anthropic, "claude-3-5-sonnet-20241022"}} =
-               LLMDb.parse("anthropic:claude-3-5-sonnet-20241022")
+               LLMDB.parse("anthropic:claude-3-5-sonnet-20241022")
     end
 
     test "accepts tuple format" do
-      assert {:ok, {:openai, "gpt-4o"}} = LLMDb.parse({:openai, "gpt-4o"})
+      assert {:ok, {:openai, "gpt-4o"}} = LLMDB.parse({:openai, "gpt-4o"})
     end
 
     test "returns error for invalid format" do
-      assert {:error, _} = LLMDb.parse("invalid")
-      assert {:error, _} = LLMDb.parse("no-colon")
+      assert {:error, _} = LLMDB.parse("invalid")
+      assert {:error, _} = LLMDB.parse("no-colon")
     end
   end
 
@@ -195,10 +195,10 @@ defmodule LLMDb.APITest do
       provider_ids = Enum.map(providers, & &1.id)
 
       {filters, _unknown_info} =
-        LLMDb.Config.compile_filters(app_config.allow, app_config.deny, provider_ids)
+        LLMDB.Config.compile_filters(app_config.allow, app_config.deny, provider_ids)
 
       # Apply filters - model should be filtered out
-      filtered_models = LLMDb.Engine.apply_filters(models, filters)
+      filtered_models = LLMDB.Engine.apply_filters(models, filters)
 
       snapshot = %{
         providers_by_id: Map.new(providers, &{&1.id, &1}),
@@ -221,8 +221,8 @@ defmodule LLMDb.APITest do
 
     test "resolves aliases when checking allowed" do
       # Both the alias and canonical ID should be denied (filtered out at load time)
-      refute LLMDb.allowed?({:openai, "gpt-4-omni"})
-      refute LLMDb.allowed?({:openai, "gpt-4o"})
+      refute LLMDB.allowed?({:openai, "gpt-4-omni"})
+      refute LLMDB.allowed?({:openai, "gpt-4o"})
     end
   end
 

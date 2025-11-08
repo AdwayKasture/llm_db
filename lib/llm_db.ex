@@ -1,4 +1,4 @@
-defmodule LLMDb do
+defmodule LLMDB do
   @moduledoc """
   Fast, persistent_term-backed LLM model metadata catalog.
 
@@ -55,31 +55,31 @@ defmodule LLMDb do
   ## Examples
 
       # Get all providers
-      providers = LLMDb.providers()
+      providers = LLMDB.providers()
 
       # Get a specific provider
-      {:ok, provider} = LLMDb.provider(:openai)
+      {:ok, provider} = LLMDB.provider(:openai)
 
       # Get all models for a provider
-      models = LLMDb.models(:openai)
+      models = LLMDB.models(:openai)
 
       # Get a specific model
-      {:ok, model} = LLMDb.model(:openai, "gpt-4o-mini")
+      {:ok, model} = LLMDB.model(:openai, "gpt-4o-mini")
 
       # Parse spec and get model
-      {:ok, model} = LLMDb.model("openai:gpt-4o-mini")
+      {:ok, model} = LLMDB.model("openai:gpt-4o-mini")
 
       # Select a model matching requirements
-      {:ok, {:openai, "gpt-4o-mini"}} = LLMDb.select(
+      {:ok, {:openai, "gpt-4o-mini"}} = LLMDB.select(
         require: [chat: true, tools: true, json_native: true],
         prefer: [:openai, :anthropic]
       )
 
       # Check if a model is allowed
-      true = LLMDb.allowed?({:openai, "gpt-4o-mini"})
+      true = LLMDB.allowed?({:openai, "gpt-4o-mini"})
   """
 
-  alias LLMDb.{Loader, Model, Provider, Query, Spec, Store}
+  alias LLMDB.{Loader, Model, Provider, Query, Spec, Store}
 
   @type provider :: atom()
   @type model_id :: String.t()
@@ -114,20 +114,20 @@ defmodule LLMDb do
   ## Examples
 
       # Load with default configuration from app env
-      {:ok, _snapshot} = LLMDb.load()
+      {:ok, _snapshot} = LLMDB.load()
 
       # Load with provider filter
-      {:ok, _snapshot} = LLMDb.load(allow: [:openai, :anthropic])
+      {:ok, _snapshot} = LLMDB.load(allow: [:openai, :anthropic])
 
       # Load with model pattern filters
-      {:ok, _snapshot} = LLMDb.load(
+      {:ok, _snapshot} = LLMDB.load(
         allow: %{openai: ["gpt-4*"], anthropic: :all},
         deny: %{openai: ["gpt-4-0613"]},
         prefer: [:anthropic, :openai]
       )
 
       # Load with custom providers/models
-      {:ok, _snapshot} = LLMDb.load(
+      {:ok, _snapshot} = LLMDB.load(
         custom: %{
           local: [
             name: "Local Provider",
@@ -163,7 +163,7 @@ defmodule LLMDb do
 
   ## Examples
 
-      LLMDb.load_empty()
+      LLMDB.load_empty()
       #=> {:ok, %{providers: [], models: %{}, ...}}
   """
   @spec load_empty(keyword()) :: {:ok, map()}
@@ -180,8 +180,8 @@ defmodule LLMDb do
 
   ## Examples
 
-      providers = LLMDb.providers()
-      #=> [%LLMDb.Provider{id: :anthropic, ...}, ...]
+      providers = LLMDB.providers()
+      #=> [%LLMDB.Provider{id: :anthropic, ...}, ...]
   """
   @spec providers() :: [Provider.t()]
   defdelegate providers(), to: Store
@@ -200,7 +200,7 @@ defmodule LLMDb do
 
   ## Examples
 
-      {:ok, provider} = LLMDb.provider(:openai)
+      {:ok, provider} = LLMDB.provider(:openai)
   """
   @spec provider(provider()) :: {:ok, Provider.t()} | {:error, term()}
   defdelegate provider(provider), to: Store
@@ -212,8 +212,8 @@ defmodule LLMDb do
 
   ## Examples
 
-      models = LLMDb.models()
-      #=> [%LLMDb.Model{}, ...]
+      models = LLMDB.models()
+      #=> [%LLMDB.Model{}, ...]
   """
   @spec models() :: [Model.t()]
   def models do
@@ -234,8 +234,8 @@ defmodule LLMDb do
 
   ## Examples
 
-      models = LLMDb.models(:openai)
-      #=> [%LLMDb.Model{id: "gpt-4o", ...}, ...]
+      models = LLMDB.models(:openai)
+      #=> [%LLMDB.Model{id: "gpt-4o", ...}, ...]
   """
   @spec models(provider()) :: [Model.t()]
   defdelegate models(provider), to: Store
@@ -256,9 +256,9 @@ defmodule LLMDb do
 
   ## Examples
 
-      {:ok, model} = LLMDb.model("openai:gpt-4o-mini")
-      {:ok, model} = LLMDb.model("gpt-4o-mini@openai")
-      {:ok, model} = LLMDb.model("anthropic:claude-3-5-sonnet-20241022")
+      {:ok, model} = LLMDB.model("openai:gpt-4o-mini")
+      {:ok, model} = LLMDB.model("gpt-4o-mini@openai")
+      {:ok, model} = LLMDB.model("anthropic:claude-3-5-sonnet-20241022")
   """
   @spec model(String.t()) :: {:ok, Model.t()} | {:error, term()}
   def model(spec) when is_binary(spec) do
@@ -282,7 +282,7 @@ defmodule LLMDb do
 
   ## Examples
 
-      {:ok, model} = LLMDb.model(:openai, "gpt-4o-mini")
+      {:ok, model} = LLMDB.model(:openai, "gpt-4o-mini")
   """
   @spec model(provider(), model_id()) :: {:ok, Model.t()} | {:error, term()}
   defdelegate model(provider, model_id), to: Store
@@ -292,7 +292,7 @@ defmodule LLMDb do
   @doc """
   Selects the first model matching capability requirements.
 
-  Delegates to `LLMDb.Query.select/1`.
+  Delegates to `LLMDB.Query.select/1`.
 
   ## Options
 
@@ -308,7 +308,7 @@ defmodule LLMDb do
 
   ## Examples
 
-      {:ok, {provider, model_id}} = LLMDb.select(
+      {:ok, {provider, model_id}} = LLMDB.select(
         require: [chat: true, tools: true],
         prefer: [:openai, :anthropic]
       )
@@ -320,7 +320,7 @@ defmodule LLMDb do
   @doc """
   Returns all models matching capability requirements.
 
-  Delegates to `LLMDb.Query.candidates/1`.
+  Delegates to `LLMDB.Query.candidates/1`.
 
   ## Options
 
@@ -335,7 +335,7 @@ defmodule LLMDb do
 
   ## Examples
 
-      candidates = LLMDb.candidates(
+      candidates = LLMDB.candidates(
         require: [chat: true, tools: true],
         prefer: [:openai, :anthropic]
       )
@@ -347,7 +347,7 @@ defmodule LLMDb do
   @doc """
   Gets capabilities for a model spec.
 
-  Delegates to `LLMDb.Query.capabilities/1`.
+  Delegates to `LLMDB.Query.capabilities/1`.
 
   ## Parameters
 
@@ -355,7 +355,7 @@ defmodule LLMDb do
 
   ## Examples
 
-      caps = LLMDb.capabilities({:openai, "gpt-4o-mini"})
+      caps = LLMDB.capabilities({:openai, "gpt-4o-mini"})
       #=> %{chat: true, tools: %{enabled: true, ...}, ...}
   """
   @spec capabilities(model_spec()) :: map() | nil
@@ -378,11 +378,11 @@ defmodule LLMDb do
 
   ## Examples
 
-      true = LLMDb.allowed?({:openai, "gpt-4o-mini"})
-      true = LLMDb.allowed?("openai:gpt-4o-mini")
+      true = LLMDB.allowed?({:openai, "gpt-4o-mini"})
+      true = LLMDB.allowed?("openai:gpt-4o-mini")
 
-      {:ok, model} = LLMDb.model(:openai, "gpt-4o-mini")
-      true = LLMDb.allowed?(model)
+      {:ok, model} = LLMDB.model(:openai, "gpt-4o-mini")
+      true = LLMDB.allowed?(model)
   """
   @spec allowed?(model_spec()) :: boolean()
   def allowed?(%Model{provider: p, id: id}), do: allowed?({p, id})
@@ -421,13 +421,13 @@ defmodule LLMDb do
 
   ## Examples
 
-      {:ok, {:openai, "gpt-4o-mini"}} = LLMDb.parse("openai:gpt-4o-mini")
-      {:ok, {:openai, "gpt-4o-mini"}} = LLMDb.parse("gpt-4o-mini@openai")
-      {:ok, {:anthropic, "claude-3-5-sonnet-20241022"}} = LLMDb.parse("anthropic:claude-3-5-sonnet-20241022")
-      {:ok, {:openai, "gpt-4o"}} = LLMDb.parse({:openai, "gpt-4o"})
+      {:ok, {:openai, "gpt-4o-mini"}} = LLMDB.parse("openai:gpt-4o-mini")
+      {:ok, {:openai, "gpt-4o-mini"}} = LLMDB.parse("gpt-4o-mini@openai")
+      {:ok, {:anthropic, "claude-3-5-sonnet-20241022"}} = LLMDB.parse("anthropic:claude-3-5-sonnet-20241022")
+      {:ok, {:openai, "gpt-4o"}} = LLMDB.parse({:openai, "gpt-4o"})
 
       # With explicit format when ambiguous
-      {:ok, {:openai, "model@test"}} = LLMDb.parse("openai:model@test", format: :colon)
+      {:ok, {:openai, "model@test"}} = LLMDB.parse("openai:model@test", format: :colon)
   """
   @spec parse(String.t() | {provider(), model_id()}, keyword()) ::
           {:ok, {provider(), model_id()}} | {:error, term()}
@@ -440,8 +440,8 @@ defmodule LLMDb do
 
   ## Examples
 
-      {:openai, "gpt-4o-mini"} = LLMDb.parse!("openai:gpt-4o-mini")
-      {:openai, "gpt-4o-mini"} = LLMDb.parse!("gpt-4o-mini@openai")
+      {:openai, "gpt-4o-mini"} = LLMDB.parse!("openai:gpt-4o-mini")
+      {:openai, "gpt-4o-mini"} = LLMDB.parse!("gpt-4o-mini@openai")
   """
   @spec parse!(String.t() | {provider(), model_id()}, keyword()) :: {provider(), model_id()}
   def parse!(spec, opts \\ []), do: Spec.parse_spec!(spec, opts)
@@ -466,9 +466,9 @@ defmodule LLMDb do
 
   ## Examples
 
-      "openai:gpt-4o-mini" = LLMDb.format({:openai, "gpt-4o-mini"})
-      "gpt-4o-mini@openai" = LLMDb.format({:openai, "gpt-4o-mini"}, :filename_safe)
-      "gpt-4o-mini@openai" = LLMDb.format({:openai, "gpt-4o-mini"}, :model_at_provider)
+      "openai:gpt-4o-mini" = LLMDB.format({:openai, "gpt-4o-mini"})
+      "gpt-4o-mini@openai" = LLMDB.format({:openai, "gpt-4o-mini"}, :filename_safe)
+      "gpt-4o-mini@openai" = LLMDB.format({:openai, "gpt-4o-mini"}, :model_at_provider)
   """
   @spec format({provider(), model_id()}, atom() | nil) :: String.t()
   def format(spec, format \\ nil), do: Spec.format_spec(spec, format)
@@ -486,9 +486,9 @@ defmodule LLMDb do
 
   ## Examples
 
-      "gpt-4@openai" = LLMDb.build("openai:gpt-4", format: :filename_safe)
-      "openai:gpt-4" = LLMDb.build("gpt-4@openai", format: :provider_colon_model)
-      "gpt-4@openai" = LLMDb.build({:openai, "gpt-4"}, format: :model_at_provider)
+      "gpt-4@openai" = LLMDB.build("openai:gpt-4", format: :filename_safe)
+      "openai:gpt-4" = LLMDB.build("gpt-4@openai", format: :provider_colon_model)
+      "gpt-4@openai" = LLMDB.build({:openai, "gpt-4"}, format: :model_at_provider)
   """
   @spec build(String.t() | {provider(), model_id()}, keyword()) :: String.t()
   def build(input, opts \\ []), do: Spec.build_spec(input, opts)

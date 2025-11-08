@@ -1,4 +1,4 @@
-defmodule LLMDb.Provider do
+defmodule LLMDB.Provider do
   @moduledoc """
   Provider struct with Zoi schema validation.
 
@@ -42,10 +42,10 @@ defmodule LLMDb.Provider do
 
   ## Examples
 
-      iex> LLMDb.Provider.new(%{id: :openai, name: "OpenAI"})
-      {:ok, %LLMDb.Provider{id: :openai, name: "OpenAI"}}
+      iex> LLMDB.Provider.new(%{id: :openai, name: "OpenAI"})
+      {:ok, %LLMDB.Provider{id: :openai, name: "OpenAI"}}
 
-      iex> LLMDb.Provider.new(%{})
+      iex> LLMDB.Provider.new(%{})
       {:error, _validation_errors}
   """
   @spec new(map()) :: {:ok, t()} | {:error, term()}
@@ -58,8 +58,8 @@ defmodule LLMDb.Provider do
 
   ## Examples
 
-      iex> LLMDb.Provider.new!(%{id: :openai, name: "OpenAI"})
-      %LLMDb.Provider{id: :openai, name: "OpenAI"}
+      iex> LLMDB.Provider.new!(%{id: :openai, name: "OpenAI"})
+      %LLMDB.Provider{id: :openai, name: "OpenAI"}
   """
   @spec new!(map()) :: t()
   def new!(attrs) when is_map(attrs) do
@@ -70,10 +70,10 @@ defmodule LLMDb.Provider do
   end
 end
 
-defimpl DeepMerge.Resolver, for: LLMDb.Provider do
+defimpl DeepMerge.Resolver, for: LLMDB.Provider do
   @moduledoc false
 
-  def resolve(original, override = %LLMDb.Provider{}, resolver) do
+  def resolve(original, override = %LLMDB.Provider{}, resolver) do
     cleaned_override =
       override
       |> Map.from_struct()

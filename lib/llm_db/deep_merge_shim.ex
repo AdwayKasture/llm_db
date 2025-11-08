@@ -1,4 +1,4 @@
-defmodule LLMDb.DeepMergeShim do
+defmodule LLMDB.DeepMergeShim do
   @moduledoc """
   Shim to call DeepMerge.deep_merge/3 with a 3-arity resolver without Dialyzer false positives.
 

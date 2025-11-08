@@ -1,4 +1,4 @@
-defmodule LLMDb.Sources.OpenRouter do
+defmodule LLMDB.Sources.OpenRouter do
   @moduledoc """
   Remote source for OpenRouter metadata (https://openrouter.ai/api/v1/models).
 
@@ -29,7 +29,7 @@ defmodule LLMDb.Sources.OpenRouter do
       {:ok, data} = OpenRouter.load(%{})
   """
 
-  @behaviour LLMDb.Source
+  @behaviour LLMDB.Source
 
   require Logger
 

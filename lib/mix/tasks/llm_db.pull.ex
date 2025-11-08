@@ -1,4 +1,4 @@
-defmodule Mix.Tasks.LlmDb.Pull do
+defmodule Mix.Tasks.LLMDB.Pull do
   use Mix.Task
 
   @shortdoc "Pull latest data from all configured remote sources"
@@ -24,8 +24,8 @@ defmodule Mix.Tasks.LlmDb.Pull do
 
       config :llm_db,
         sources: [
-          {LLMDb.Sources.ModelsDev, %{}},
-          {LLMDb.Sources.Local, %{dir: "priv/llm_db"}}
+          {LLMDB.Sources.ModelsDev, %{}},
+          {LLMDB.Sources.Local, %{dir: "priv/llm_db"}}
         ]
 
   Only sources that implement the optional `pull/1` callback will be pulled.
@@ -42,9 +42,9 @@ defmodule Mix.Tasks.LlmDb.Pull do
 
       Pulling from configured sources...
 
-      ✓ LLMDb.Sources.ModelsDev: Updated (709.2 KB)
-      ○ LLMDb.Sources.OpenRouter: Not modified
-      - LLMDb.Sources.Local: No pull callback (skipped)
+      ✓ LLMDB.Sources.ModelsDev: Updated (709.2 KB)
+      ○ LLMDB.Sources.OpenRouter: Not modified
+      - LLMDB.Sources.Local: No pull callback (skipped)
 
       Summary: 1 updated, 1 unchanged, 1 skipped, 0 failed
 
@@ -55,14 +55,14 @@ defmodule Mix.Tasks.LlmDb.Pull do
   def run(_args) do
     Mix.Task.run("app.start")
 
-    sources = LLMDb.Config.sources!()
+    sources = LLMDB.Config.sources!()
 
     if sources == [] do
       Mix.shell().info("No sources configured. Add sources to your config:")
       Mix.shell().info("")
       Mix.shell().info("  config :llm_db,")
       Mix.shell().info("    sources: [")
-      Mix.shell().info("      {LLMDb.Sources.ModelsDev, %{}}")
+      Mix.shell().info("      {LLMDB.Sources.ModelsDev, %{}}")
       Mix.shell().info("    ]")
       Mix.shell().info("")
       Mix.raise("No sources configured")

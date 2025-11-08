@@ -1,6 +1,6 @@
-defmodule LLMDb.Source do
+defmodule LLMDB.Source do
   @moduledoc """
-  Unified data source interface for LLMDb.
+  Unified data source interface for LLMDB.
 
   Sources return providers and models data in **canonical Zoi format**.
   No filtering, no excludes. Validation happens later via Engine pipeline.
@@ -199,7 +199,7 @@ defmodule LLMDb.Source do
         - Provider maps with atom keys
         - Required fields: :id (atom/string), :models (list)
 
-      See LLMDb.Source moduledoc for format specification.
+      See LLMDB.Source moduledoc for format specification.
       """
     end
   end

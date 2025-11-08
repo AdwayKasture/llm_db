@@ -1,4 +1,4 @@
-defmodule LLMDb.Normalize do
+defmodule LLMDB.Normalize do
   @moduledoc """
   Complete normalization utilities for raw data into consistent formats.
 
@@ -23,13 +23,13 @@ defmodule LLMDb.Normalize do
 
   ## Examples
 
-      iex> LLMDb.Normalize.normalize_provider_id("google-vertex")
+      iex> LLMDB.Normalize.normalize_provider_id("google-vertex")
       {:ok, :google_vertex}
 
-      iex> LLMDb.Normalize.normalize_provider_id(:openai)
+      iex> LLMDB.Normalize.normalize_provider_id(:openai)
       {:ok, :openai}
 
-      iex> LLMDb.Normalize.normalize_provider_id("malicious#{String.duplicate("a", 1000)}")
+      iex> LLMDB.Normalize.normalize_provider_id("malicious#{String.duplicate("a", 1000)}")
       {:error, :bad_provider}
   """
   @spec normalize_provider_id(binary() | atom(), keyword()) ::
@@ -77,13 +77,13 @@ defmodule LLMDb.Normalize do
 
   ## Examples
 
-      iex> LLMDb.Normalize.normalize_model_identity(%{provider: "google-vertex", id: "gemini-pro"})
+      iex> LLMDB.Normalize.normalize_model_identity(%{provider: "google-vertex", id: "gemini-pro"})
       {:ok, {:google_vertex, "gemini-pro"}}
 
-      iex> LLMDb.Normalize.normalize_model_identity(%{provider: :openai, id: "gpt-4"})
+      iex> LLMDB.Normalize.normalize_model_identity(%{provider: :openai, id: "gpt-4"})
       {:ok, {:openai, "gpt-4"}}
 
-      iex> LLMDb.Normalize.normalize_model_identity(%{provider: "openai"})
+      iex> LLMDB.Normalize.normalize_model_identity(%{provider: "openai"})
       {:error, :missing_id}
   """
   @spec normalize_model_identity(map(), keyword()) ::
@@ -112,16 +112,16 @@ defmodule LLMDb.Normalize do
 
   ## Examples
 
-      iex> LLMDb.Normalize.normalize_date("2024-01-15")
+      iex> LLMDB.Normalize.normalize_date("2024-01-15")
       "2024-01-15"
 
-      iex> LLMDb.Normalize.normalize_date("2024/01/15")
+      iex> LLMDB.Normalize.normalize_date("2024/01/15")
       "2024-01-15"
 
-      iex> LLMDb.Normalize.normalize_date("invalid-date")
+      iex> LLMDB.Normalize.normalize_date("invalid-date")
       "invalid-date"
 
-      iex> LLMDb.Normalize.normalize_date(nil)
+      iex> LLMDB.Normalize.normalize_date(nil)
       nil
   """
   @spec normalize_date(String.t() | nil) :: String.t() | nil
@@ -145,7 +145,7 @@ defmodule LLMDb.Normalize do
 
   ## Examples
 
-      iex> LLMDb.Normalize.normalize_providers([%{id: "google-vertex"}, %{id: :openai}])
+      iex> LLMDB.Normalize.normalize_providers([%{id: "google-vertex"}, %{id: :openai}])
       [%{id: :google_vertex}, %{id: :openai}]
   """
   @spec normalize_providers([map()]) :: [map()]
@@ -160,7 +160,7 @@ defmodule LLMDb.Normalize do
 
   ## Examples
 
-      iex> LLMDb.Normalize.normalize_models([%{provider: "google-vertex", id: "gemini-pro"}])
+      iex> LLMDB.Normalize.normalize_models([%{provider: "google-vertex", id: "gemini-pro"}])
       [%{provider: :google_vertex, id: "gemini-pro"}]
   """
   @spec normalize_models([map()]) :: [map()]

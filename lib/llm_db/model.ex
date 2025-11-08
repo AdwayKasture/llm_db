@@ -1,4 +1,4 @@
-defmodule LLMDb.Model do
+defmodule LLMDB.Model do
   @moduledoc """
   Model struct with Zoi schema validation.
 
@@ -117,10 +117,10 @@ defmodule LLMDb.Model do
 
   ## Examples
 
-      iex> LLMDb.Model.new(%{id: "gpt-4", provider: :openai})
-      {:ok, %LLMDb.Model{id: "gpt-4", provider: :openai}}
+      iex> LLMDB.Model.new(%{id: "gpt-4", provider: :openai})
+      {:ok, %LLMDB.Model{id: "gpt-4", provider: :openai}}
 
-      iex> LLMDb.Model.new(%{})
+      iex> LLMDB.Model.new(%{})
       {:error, _validation_errors}
   """
   @spec new(map()) :: {:ok, t()} | {:error, term()}
@@ -133,8 +133,8 @@ defmodule LLMDb.Model do
 
   ## Examples
 
-      iex> LLMDb.Model.new!(%{id: "gpt-4", provider: :openai})
-      %LLMDb.Model{id: "gpt-4", provider: :openai}
+      iex> LLMDB.Model.new!(%{id: "gpt-4", provider: :openai})
+      %LLMDB.Model{id: "gpt-4", provider: :openai}
   """
   @spec new!(map()) :: t()
   def new!(attrs) when is_map(attrs) do
@@ -145,10 +145,10 @@ defmodule LLMDb.Model do
   end
 end
 
-defimpl DeepMerge.Resolver, for: LLMDb.Model do
+defimpl DeepMerge.Resolver, for: LLMDB.Model do
   @moduledoc false
 
-  def resolve(original, override = %LLMDb.Model{}, resolver) do
+  def resolve(original, override = %LLMDB.Model{}, resolver) do
     cleaned_override =
       override
       |> Map.from_struct()

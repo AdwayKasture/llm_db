@@ -4,7 +4,7 @@ The Engine runs a build-time ETL pipeline that loads data from sources, normaliz
 
 ## Source Behaviour
 
-All sources implement the `LLMDb.Source` behaviour:
+All sources implement the `LLMDB.Source` behaviour:
 
 ```elixir
 @callback load(opts :: map()) :: {:ok, data :: map()} | {:error, term()}
@@ -35,14 +35,14 @@ All sources implement the `LLMDb.Source` behaviour:
 }
 ```
 
-Outer map uses string keys; provider keys are atoms; model IDs are strings. Use `LLMDb.Source.assert_canonical!/1` for validation.
+Outer map uses string keys; provider keys are atoms; model IDs are strings. Use `LLMDB.Source.assert_canonical!/1` for validation.
 
 ## Built-in Sources
 
 ### ModelsDev (Remote)
 
 ```elixir
-{LLMDb.Sources.ModelsDev, %{
+{LLMDB.Sources.ModelsDev, %{
   url: "https://models.dev/api/models",
   cache_path: "priv/llm_db/cache/models_dev.json"
 }}
@@ -53,7 +53,7 @@ Outer map uses string keys; provider keys are atoms; model IDs are strings. Use 
 ### Local (TOML)
 
 ```elixir
-{LLMDb.Sources.Local, %{dir: "priv/llm_db"}}
+{LLMDB.Sources.Local, %{dir: "priv/llm_db"}}
 ```
 
 Structure: `provider.toml` + `models/{provider}/*.toml`. Atomizes keys, injects `:provider` from directory name.
@@ -63,8 +63,8 @@ Structure: `provider.toml` + `models/{provider}/*.toml`. Atomizes keys, injects 
 ```elixir
 config :llm_db,
   sources: [
-    {LLMDb.Sources.ModelsDev, %{}},
-    {LLMDb.Sources.Local, %{dir: "priv/llm_db"}}
+    {LLMDB.Sources.ModelsDev, %{}},
+    {LLMDB.Sources.Local, %{dir: "priv/llm_db"}}
   ]
 ```
 
@@ -72,11 +72,11 @@ Sources processed in order. Later sources override earlier ones.
 
 ## ETL Pipeline
 
-`LLMDb.Engine.run/1` executes 7 stages:
+`LLMDB.Engine.run/1` executes 7 stages:
 
 1. **Ingest**: Load sources, validate canonical format, flatten nested provider data
 2. **Normalize**: Convert provider IDs to atoms, normalize modalities to atoms, parse dates
-3. **Validate**: Zoi validation via `LLMDb.Validate`, drop invalid, log warnings
+3. **Validate**: Zoi validation via `LLMDB.Validate`, drop invalid, log warnings
 4. **Merge**: Last-wins precedence; `:aliases` are unioned, other lists replaced, maps deep merged
 5. **Filter**: Compile allow/deny patterns (deny wins, globs supported)
 6. **Enrich**: Derive `:family`, fill `:provider_model_id`, apply capability defaults
@@ -93,7 +93,7 @@ Final check warns if zero providers/models.
 
 ```elixir
 defmodule MyApp.InternalModels do
-  @behaviour LLMDb.Source
+  @behaviour LLMDB.Source
 
   @impl true
   def load(_opts) do

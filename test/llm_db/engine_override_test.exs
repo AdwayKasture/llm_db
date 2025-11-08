@@ -1,7 +1,7 @@
-defmodule LLMDb.EngineOverrideTest do
+defmodule LLMDB.EngineOverrideTest do
   use ExUnit.Case, async: false
 
-  alias LLMDb.{Config, Engine, Store}
+  alias LLMDB.{Config, Engine, Store}
 
   setup do
     Store.clear!()
@@ -91,13 +91,13 @@ defmodule LLMDb.EngineOverrideTest do
       }
 
       sources = [
-        {LLMDb.Sources.Config, %{overrides: base}},
-        {LLMDb.Sources.Config, %{overrides: override}}
+        {LLMDB.Sources.Config, %{overrides: base}},
+        {LLMDB.Sources.Config, %{overrides: override}}
       ]
 
       assert {:ok, _snapshot} = run_and_store(sources)
 
-      {:ok, provider} = LLMDb.provider(:openai)
+      {:ok, provider} = LLMDB.provider(:openai)
       assert provider.name == "OpenAI Custom"
       assert provider.base_url == "https://custom.openai.proxy/v1"
       # Arrays are replaced, not unioned (later source wins)
@@ -130,13 +130,13 @@ defmodule LLMDb.EngineOverrideTest do
       }
 
       sources = [
-        {LLMDb.Sources.Config, %{overrides: base}},
-        {LLMDb.Sources.Config, %{overrides: override}}
+        {LLMDB.Sources.Config, %{overrides: base}},
+        {LLMDB.Sources.Config, %{overrides: override}}
       ]
 
       assert {:ok, _snapshot} = run_and_store(sources)
 
-      {:ok, provider} = LLMDb.provider(:anthropic)
+      {:ok, provider} = LLMDB.provider(:anthropic)
       # Expected for req_llm: arrays should be replaced
       assert provider.env == ["CUSTOM_KEY"]
       refute "ANTHROPIC_API_KEY" in provider.env
@@ -163,13 +163,13 @@ defmodule LLMDb.EngineOverrideTest do
       }
 
       sources = [
-        {LLMDb.Sources.Config, %{overrides: base}},
-        {LLMDb.Sources.Config, %{overrides: override}}
+        {LLMDB.Sources.Config, %{overrides: base}},
+        {LLMDB.Sources.Config, %{overrides: override}}
       ]
 
       assert {:ok, _snapshot} = run_and_store(sources)
 
-      {:ok, provider} = LLMDb.provider(:custom_provider)
+      {:ok, provider} = LLMDB.provider(:custom_provider)
       assert provider.name == "Custom Provider"
       assert provider.base_url == "https://custom.api/v1"
     end
@@ -197,14 +197,14 @@ defmodule LLMDb.EngineOverrideTest do
       }
 
       sources = [
-        {LLMDb.Sources.Config, %{overrides: base}},
-        {LLMDb.Sources.Config, %{overrides: override}}
+        {LLMDB.Sources.Config, %{overrides: base}},
+        {LLMDB.Sources.Config, %{overrides: override}}
       ]
 
       assert {:ok, _snapshot} = run_and_store(sources)
 
-      assert {:ok, _} = LLMDb.model(:openai, "gpt-4")
-      assert {:ok, _} = LLMDb.model(:openai, "gpt-4-custom")
+      assert {:ok, _} = LLMDB.model(:openai, "gpt-4")
+      assert {:ok, _} = LLMDB.model(:openai, "gpt-4-custom")
     end
 
     test "modifies capability fields (reasoning, tools)" do
@@ -239,13 +239,13 @@ defmodule LLMDb.EngineOverrideTest do
       }
 
       sources = [
-        {LLMDb.Sources.Config, %{overrides: base}},
-        {LLMDb.Sources.Config, %{overrides: override}}
+        {LLMDB.Sources.Config, %{overrides: base}},
+        {LLMDB.Sources.Config, %{overrides: override}}
       ]
 
       assert {:ok, _snapshot} = run_and_store(sources)
 
-      {:ok, model} = LLMDb.model(:openai, "gpt-4")
+      {:ok, model} = LLMDB.model(:openai, "gpt-4")
       assert model.capabilities.reasoning.enabled == true
       assert model.capabilities.tools.strict == false
       assert model.capabilities.tools.enabled == true
@@ -282,13 +282,13 @@ defmodule LLMDb.EngineOverrideTest do
       }
 
       sources = [
-        {LLMDb.Sources.Config, %{overrides: base}},
-        {LLMDb.Sources.Config, %{overrides: override}}
+        {LLMDB.Sources.Config, %{overrides: base}},
+        {LLMDB.Sources.Config, %{overrides: override}}
       ]
 
       assert {:ok, _snapshot} = run_and_store(sources)
 
-      {:ok, model} = LLMDb.model(:openai, "gpt-4")
+      {:ok, model} = LLMDB.model(:openai, "gpt-4")
       assert model.cost.input == 25.0
       assert model.cost.output == 60.0
     end
@@ -324,13 +324,13 @@ defmodule LLMDb.EngineOverrideTest do
       }
 
       sources = [
-        {LLMDb.Sources.Config, %{overrides: base}},
-        {LLMDb.Sources.Config, %{overrides: override}}
+        {LLMDB.Sources.Config, %{overrides: base}},
+        {LLMDB.Sources.Config, %{overrides: override}}
       ]
 
       assert {:ok, _snapshot} = run_and_store(sources)
 
-      {:ok, model} = LLMDb.model(:anthropic, "claude-3-opus")
+      {:ok, model} = LLMDB.model(:anthropic, "claude-3-opus")
       assert model.limits.context == 180_000
       assert model.limits.output == 4096
     end
@@ -366,13 +366,13 @@ defmodule LLMDb.EngineOverrideTest do
       }
 
       sources = [
-        {LLMDb.Sources.Config, %{overrides: base}},
-        {LLMDb.Sources.Config, %{overrides: override}}
+        {LLMDB.Sources.Config, %{overrides: base}},
+        {LLMDB.Sources.Config, %{overrides: override}}
       ]
 
       assert {:ok, _snapshot} = run_and_store(sources)
 
-      {:ok, model} = LLMDb.model(:openai, "gpt-4")
+      {:ok, model} = LLMDB.model(:openai, "gpt-4")
       # Input should union since it's an accumulative field
       assert model.modalities.input == [:text, :image]
       # Output should be preserved from base
@@ -399,13 +399,13 @@ defmodule LLMDb.EngineOverrideTest do
       }
 
       sources = [
-        {LLMDb.Sources.Config, %{overrides: base}},
-        {LLMDb.Sources.Config, %{overrides: override}}
+        {LLMDB.Sources.Config, %{overrides: base}},
+        {LLMDB.Sources.Config, %{overrides: override}}
       ]
 
       assert {:ok, _snapshot} = run_and_store(sources)
 
-      {:ok, provider} = LLMDb.provider(:openai)
+      {:ok, provider} = LLMDB.provider(:openai)
       assert provider.doc == "Custom documentation"
       assert provider.extra.custom_field == "custom value"
     end
@@ -434,13 +434,13 @@ defmodule LLMDb.EngineOverrideTest do
       }
 
       sources = [
-        {LLMDb.Sources.Config, %{overrides: base}},
-        {LLMDb.Sources.Config, %{overrides: override}}
+        {LLMDB.Sources.Config, %{overrides: base}},
+        {LLMDB.Sources.Config, %{overrides: override}}
       ]
 
       assert {:ok, _snapshot} = run_and_store(sources)
 
-      {:ok, model} = LLMDb.model(:openai, "gpt-4")
+      {:ok, model} = LLMDB.model(:openai, "gpt-4")
       assert model.extra.supports_strict_tools == true
       assert model.extra.api == "chat"
       assert model.extra.type == "llm"
@@ -483,17 +483,17 @@ defmodule LLMDb.EngineOverrideTest do
       }
 
       sources = [
-        {LLMDb.Sources.Config, %{overrides: base}},
-        {LLMDb.Sources.Config, %{overrides: override}}
+        {LLMDB.Sources.Config, %{overrides: base}},
+        {LLMDB.Sources.Config, %{overrides: override}}
       ]
 
       assert {:ok, _snapshot} = run_and_store(sources)
 
-      {:ok, provider} = LLMDb.provider(:openai)
+      {:ok, provider} = LLMDB.provider(:openai)
       assert provider.extra.custom_base == "base value"
       assert provider.extra.custom_override == "override value"
 
-      {:ok, model} = LLMDb.model(:openai, "gpt-4")
+      {:ok, model} = LLMDB.model(:openai, "gpt-4")
       assert model.extra.custom_model_base == "model base value"
       assert model.extra.custom_model_override == "model override value"
     end
@@ -520,14 +520,14 @@ defmodule LLMDb.EngineOverrideTest do
         ]
       }
 
-      sources = [{LLMDb.Sources.Config, %{overrides: base}}]
+      sources = [{LLMDB.Sources.Config, %{overrides: base}}]
       filters = %{deny: %{openai: ["gpt-3.5-turbo", "gpt-4-vision"]}}
 
       assert {:ok, _snapshot} = run_and_store(sources, filters: filters)
 
-      assert {:ok, _} = LLMDb.model(:openai, "gpt-4")
-      assert {:error, :not_found} = LLMDb.model(:openai, "gpt-3.5-turbo")
-      assert {:error, :not_found} = LLMDb.model(:openai, "gpt-4-vision")
+      assert {:ok, _} = LLMDB.model(:openai, "gpt-4")
+      assert {:error, :not_found} = LLMDB.model(:openai, "gpt-3.5-turbo")
+      assert {:error, :not_found} = LLMDB.model(:openai, "gpt-4-vision")
     end
 
     test "exact ID matching for special characters (colon, slash, @, dots)" do
@@ -561,7 +561,7 @@ defmodule LLMDb.EngineOverrideTest do
         ]
       }
 
-      sources = [{LLMDb.Sources.Config, %{overrides: base}}]
+      sources = [{LLMDB.Sources.Config, %{overrides: base}}]
 
       filters = %{
         deny: %{
@@ -575,10 +575,10 @@ defmodule LLMDb.EngineOverrideTest do
 
       assert {:ok, _snapshot} = run_and_store(sources, filters: filters)
 
-      assert {:error, :not_found} = LLMDb.model(:custom, "model:with:colons")
-      assert {:error, :not_found} = LLMDb.model(:custom, "model/with/slashes")
-      assert {:error, :not_found} = LLMDb.model(:custom, "model@version")
-      assert {:ok, _} = LLMDb.model(:custom, "model.v1.2.3")
+      assert {:error, :not_found} = LLMDB.model(:custom, "model:with:colons")
+      assert {:error, :not_found} = LLMDB.model(:custom, "model/with/slashes")
+      assert {:error, :not_found} = LLMDB.model(:custom, "model@version")
+      assert {:ok, _} = LLMDB.model(:custom, "model.v1.2.3")
     end
 
     test "wildcard deny patterns" do
@@ -596,14 +596,14 @@ defmodule LLMDb.EngineOverrideTest do
         ]
       }
 
-      sources = [{LLMDb.Sources.Config, %{overrides: base}}]
+      sources = [{LLMDB.Sources.Config, %{overrides: base}}]
       filters = %{deny: %{openai: ["gpt-*"]}}
 
       assert {:ok, _snapshot} = run_and_store(sources, filters: filters)
 
-      assert {:error, :not_found} = LLMDb.model(:openai, "gpt-4")
-      assert {:error, :not_found} = LLMDb.model(:openai, "gpt-3.5-turbo")
-      assert {:ok, _} = LLMDb.model(:openai, "davinci")
+      assert {:error, :not_found} = LLMDB.model(:openai, "gpt-4")
+      assert {:error, :not_found} = LLMDB.model(:openai, "gpt-3.5-turbo")
+      assert {:ok, _} = LLMDB.model(:openai, "davinci")
     end
   end
 
@@ -663,18 +663,18 @@ defmodule LLMDb.EngineOverrideTest do
       }
 
       sources = [
-        {LLMDb.Sources.Config, %{overrides: source1}},
-        {LLMDb.Sources.Config, %{overrides: source2}},
-        {LLMDb.Sources.Config, %{overrides: source3}}
+        {LLMDB.Sources.Config, %{overrides: source1}},
+        {LLMDB.Sources.Config, %{overrides: source2}},
+        {LLMDB.Sources.Config, %{overrides: source3}}
       ]
 
       assert {:ok, _snapshot} = run_and_store(sources)
 
-      {:ok, provider} = LLMDb.provider(:openai)
+      {:ok, provider} = LLMDB.provider(:openai)
       assert provider.name == "OpenAI Source 3"
       assert provider.base_url == "https://source2.api/v1"
 
-      {:ok, model} = LLMDb.model(:openai, "gpt-4")
+      {:ok, model} = LLMDB.model(:openai, "gpt-4")
       assert model.name == "GPT-4 Source 2"
       assert model.cost.input == 30.0
     end
@@ -720,19 +720,19 @@ defmodule LLMDb.EngineOverrideTest do
       }
 
       sources = [
-        {LLMDb.Sources.Config, %{overrides: source1}},
-        {LLMDb.Sources.Config, %{overrides: source2}}
+        {LLMDB.Sources.Config, %{overrides: source1}},
+        {LLMDB.Sources.Config, %{overrides: source2}}
       ]
 
       assert {:ok, _snapshot} = run_and_store(sources)
 
-      {:ok, provider} = LLMDb.provider(:openai)
+      {:ok, provider} = LLMDB.provider(:openai)
       # Provider env is not a union field, should replace
       assert provider.env == ["KEY3"]
       refute "KEY1" in provider.env
       refute "KEY2" in provider.env
 
-      {:ok, model} = LLMDb.model(:openai, "gpt-4")
+      {:ok, model} = LLMDB.model(:openai, "gpt-4")
       # Modalities.input IS a union field, should union
       assert model.modalities.input == [:text, :image, :audio]
       assert :image in model.modalities.input
@@ -778,13 +778,13 @@ defmodule LLMDb.EngineOverrideTest do
       }
 
       sources = [
-        {LLMDb.Sources.Config, %{overrides: source1}},
-        {LLMDb.Sources.Config, %{overrides: source2}}
+        {LLMDB.Sources.Config, %{overrides: source1}},
+        {LLMDB.Sources.Config, %{overrides: source2}}
       ]
 
       assert {:ok, _snapshot} = run_and_store(sources)
 
-      {:ok, model} = LLMDb.model(:openai, "gpt-4")
+      {:ok, model} = LLMDB.model(:openai, "gpt-4")
       assert model.cost.input == 25.0
       assert model.cost.output == 60.0
       assert model.cost.request == 0.01

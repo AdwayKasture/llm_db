@@ -1,7 +1,7 @@
-defmodule LLMDb.PackagedTest do
+defmodule LLMDB.PackagedTest do
   use ExUnit.Case, async: true
 
-  alias LLMDb.Packaged
+  alias LLMDB.Packaged
 
   describe "path/0" do
     test "returns correct snapshot path" do

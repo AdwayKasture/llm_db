@@ -1,7 +1,7 @@
-defmodule LLMDb.StoreTest do
+defmodule LLMDB.StoreTest do
   use ExUnit.Case, async: false
 
-  alias LLMDb.Store
+  alias LLMDB.Store
 
   setup do
     Store.clear!()

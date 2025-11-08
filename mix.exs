@@ -1,4 +1,4 @@
-defmodule LLMDb.MixProject do
+defmodule LLMDB.MixProject do
   use Mix.Project
 
   @version "2025.11.7-preview"
@@ -51,7 +51,7 @@ defmodule LLMDb.MixProject do
 
   def application do
     [
-      mod: {LLMDb.Application, []},
+      mod: {LLMDB.Application, []},
       extra_applications: [:logger]
     ]
   end

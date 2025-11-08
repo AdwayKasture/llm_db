@@ -1,4 +1,4 @@
-defmodule LLMDb.Query do
+defmodule LLMDB.Query do
   @moduledoc """
   Query functions for selecting models based on capabilities and requirements.
 
@@ -6,7 +6,7 @@ defmodule LLMDb.Query do
   All queries operate on the filtered catalog loaded into the Store.
   """
 
-  alias LLMDb.{Model, Spec, Store}
+  alias LLMDB.{Model, Spec, Store}
 
   @type provider :: atom()
   @type model_id :: String.t()
@@ -14,7 +14,7 @@ defmodule LLMDb.Query do
 
   # Maps query capability keys to their paths in the Model.capabilities schema.
   # This map is the single source of truth for capability lookups, derived from
-  # the capability schema in LLMDb.Model. Top-level capabilities like :chat and
+  # the capability schema in LLMDB.Model. Top-level capabilities like :chat and
   # :embeddings map to single-element paths, while nested capabilities like
   # :tools_streaming map to [:tools, :streaming].
   @capability_paths %{
@@ -155,7 +155,7 @@ defmodule LLMDb.Query do
       caps = Query.capabilities("openai:gpt-4o-mini")
       #=> %{chat: true, tools: %{enabled: true, ...}, ...}
 
-      {:ok, model} = LLMDb.model("openai:gpt-4o-mini")
+      {:ok, model} = LLMDB.model("openai:gpt-4o-mini")
       caps = Query.capabilities(model)
       #=> %{chat: true, tools: %{enabled: true, ...}, ...}
   """

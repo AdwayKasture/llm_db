@@ -1,4 +1,4 @@
-defmodule Mix.Tasks.LlmDb.Build do
+defmodule Mix.Tasks.LLMDB.Build do
   use Mix.Task
 
   @shortdoc "Build snapshot.json from sources using the ETL pipeline"
@@ -20,9 +20,9 @@ defmodule Mix.Tasks.LlmDb.Build do
 
       config :llm_db,
         sources: [
-          {LLMDb.Sources.Packaged, %{}},
-          {LLMDb.Sources.ModelsDev, %{url: "https://models.dev/api.json"}},
-          {LLMDb.Sources.JSONFile, %{paths: ["priv/custom.json"]}}
+          {LLMDB.Sources.Packaged, %{}},
+          {LLMDB.Sources.ModelsDev, %{url: "https://models.dev/api.json"}},
+          {LLMDB.Sources.JSONFile, %{paths: ["priv/custom.json"]}}
         ],
         allow: :all,
         deny: %{},
@@ -43,14 +43,14 @@ defmodule Mix.Tasks.LlmDb.Build do
   end
 
   defp build_snapshot do
-    config = LLMDb.Config.get()
-    sources = LLMDb.Config.sources!()
+    config = LLMDB.Config.get()
+    sources = LLMDB.Config.sources!()
 
     if sources == [] do
       Mix.shell().info("Warning: No sources configured - snapshot will be empty\n")
     end
 
-    LLMDb.Engine.run(
+    LLMDB.Engine.run(
       sources: sources,
       allow: config.allow,
       deny: config.deny,
@@ -131,7 +131,7 @@ defmodule Mix.Tasks.LlmDb.Build do
   # Write the ValidProviders module to disk
   defp write_valid_providers_module(provider_atoms) do
     module_code = """
-    defmodule LLMDb.Generated.ValidProviders do
+    defmodule LLMDB.Generated.ValidProviders do
       @moduledoc \"\"\"
       Auto-generated module containing all valid provider atoms.
 

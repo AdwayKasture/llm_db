@@ -1,7 +1,7 @@
-defmodule LLMDb.Engine.NormalizeTest do
+defmodule LLMDB.Engine.NormalizeTest do
   use ExUnit.Case, async: true
 
-  alias LLMDb.Normalize
+  alias LLMDB.Normalize
 
   doctest Normalize
 

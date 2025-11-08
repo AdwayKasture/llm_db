@@ -1,4 +1,4 @@
-defmodule LLMDb.Packaged do
+defmodule LLMDB.Packaged do
   @moduledoc """
   Provides access to the packaged base snapshot.
 

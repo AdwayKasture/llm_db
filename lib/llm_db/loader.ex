@@ -1,15 +1,15 @@
-defmodule LLMDb.Loader do
+defmodule LLMDB.Loader do
   @moduledoc """
   Handles loading and merging of packaged snapshots with runtime customization.
 
-  Phase 2 of LLMDb: Load the packaged snapshot, apply custom overlays,
+  Phase 2 of LLMDB: Load the packaged snapshot, apply custom overlays,
   compile filters, and build indexes for runtime queries.
 
   This module encapsulates all snapshot loading logic, keeping the main
-  LLMDb module focused on the query API.
+  LLMDB module focused on the query API.
   """
 
-  alias LLMDb.{Engine, Merge, Model, Packaged, Provider, Runtime}
+  alias LLMDB.{Engine, Merge, Model, Packaged, Provider, Runtime}
 
   require Logger
 

@@ -1,4 +1,4 @@
-defmodule LLMDb.Merge do
+defmodule LLMDB.Merge do
   @moduledoc """
   Precedence-aware merging with exclude handling for LLM model data.
 
@@ -6,7 +6,7 @@ defmodule LLMDb.Merge do
   configurable precedence rules. Handles excludes via exact match or glob patterns.
   """
 
-  alias LLMDb.DeepMergeShim
+  alias LLMDB.DeepMergeShim
 
   @doc """
   Creates a configurable deep merge resolver function.
@@ -63,19 +63,19 @@ defmodule LLMDb.Merge do
 
   ## Examples
 
-      iex> LLMDb.Merge.merge(%{a: 1}, %{b: 2}, :higher)
+      iex> LLMDB.Merge.merge(%{a: 1}, %{b: 2}, :higher)
       %{a: 1, b: 2}
 
-      iex> LLMDb.Merge.merge(%{a: 1}, %{a: 2}, :higher)
+      iex> LLMDB.Merge.merge(%{a: 1}, %{a: 2}, :higher)
       %{a: 2}
 
-      iex> LLMDb.Merge.merge(%{a: 1}, %{a: 2}, :lower)
+      iex> LLMDB.Merge.merge(%{a: 1}, %{a: 2}, :lower)
       %{a: 1}
 
-      iex> LLMDb.Merge.merge(%{a: %{b: 1}}, %{a: %{c: 2}}, :higher)
+      iex> LLMDB.Merge.merge(%{a: %{b: 1}}, %{a: %{c: 2}}, :higher)
       %{a: %{b: 1, c: 2}}
 
-      iex> LLMDb.Merge.merge(%{a: [1, 2]}, %{a: [2, 3]}, :higher)
+      iex> LLMDB.Merge.merge(%{a: [1, 2]}, %{a: [2, 3]}, :higher)
       %{a: [1, 2, 3]}
   """
   @spec merge(map(), map(), :higher | :lower) :: map()
@@ -95,7 +95,7 @@ defmodule LLMDb.Merge do
 
       iex> base = [%{id: :openai, name: "OpenAI"}]
       iex> override = [%{id: :openai, name: "OpenAI Updated"}, %{id: :anthropic, name: "Anthropic"}]
-      iex> result = LLMDb.Merge.merge_providers(base, override)
+      iex> result = LLMDB.Merge.merge_providers(base, override)
       iex> Enum.sort_by(result, & &1.id)
       [%{id: :anthropic, name: "Anthropic"}, %{id: :openai, name: "OpenAI Updated"}]
   """
@@ -127,17 +127,17 @@ defmodule LLMDb.Merge do
 
       iex> base = [%{id: "gpt-4", provider: :openai}]
       iex> override = [%{id: "gpt-4", provider: :openai, capabilities: %{tools: true}}]
-      iex> LLMDb.Merge.merge_models(base, override, %{})
+      iex> LLMDB.Merge.merge_models(base, override, %{})
       [%{id: "gpt-4", provider: :openai, capabilities: %{tools: true}}]
 
       iex> base = [%{id: "gpt-4", provider: :openai}, %{id: "gpt-3", provider: :openai}]
       iex> excludes = %{openai: ["gpt-3"]}
-      iex> LLMDb.Merge.merge_models(base, [], excludes)
+      iex> LLMDB.Merge.merge_models(base, [], excludes)
       [%{id: "gpt-4", provider: :openai}]
 
       iex> base = [%{id: "gpt-4o-mini", provider: :openai}, %{id: "gpt-5-pro", provider: :openai}]
       iex> excludes = %{openai: ["gpt-5-*"]}
-      iex> LLMDb.Merge.merge_models(base, [], excludes)
+      iex> LLMDB.Merge.merge_models(base, [], excludes)
       [%{id: "gpt-4o-mini", provider: :openai}]
   """
   @spec merge_models([map()], [map()], map()) :: [map()]
@@ -170,7 +170,7 @@ defmodule LLMDb.Merge do
 
   ## Examples
 
-      iex> result = LLMDb.Merge.compile_excludes(%{openai: ["gpt-3", "gpt-5-*"]})
+      iex> result = LLMDB.Merge.compile_excludes(%{openai: ["gpt-3", "gpt-5-*"]})
       iex> [exact, pattern] = result.openai
       iex> exact
       "gpt-3"
@@ -202,11 +202,11 @@ defmodule LLMDb.Merge do
 
   ## Examples
 
-      iex> pattern = LLMDb.Merge.compile_pattern("gpt-*")
+      iex> pattern = LLMDB.Merge.compile_pattern("gpt-*")
       iex> Regex.match?(pattern, "gpt-4")
       true
 
-      iex> pattern = LLMDb.Merge.compile_pattern("gpt-5-*-mini")
+      iex> pattern = LLMDB.Merge.compile_pattern("gpt-5-*-mini")
       iex> Regex.match?(pattern, "gpt-5-turbo-mini")
       true
   """
@@ -224,16 +224,16 @@ defmodule LLMDb.Merge do
 
   ## Examples
 
-      iex> LLMDb.Merge.matches_exclude?("gpt-4", ["gpt-3", "gpt-5"])
+      iex> LLMDB.Merge.matches_exclude?("gpt-4", ["gpt-3", "gpt-5"])
       false
 
-      iex> LLMDb.Merge.matches_exclude?("gpt-3", ["gpt-3", "gpt-5"])
+      iex> LLMDB.Merge.matches_exclude?("gpt-3", ["gpt-3", "gpt-5"])
       true
 
-      iex> LLMDb.Merge.matches_exclude?("gpt-5-pro", [~r/^gpt-5-.*$/])
+      iex> LLMDB.Merge.matches_exclude?("gpt-5-pro", [~r/^gpt-5-.*$/])
       true
 
-      iex> LLMDb.Merge.matches_exclude?("gpt-4", [~r/^gpt-5-.*$/])
+      iex> LLMDB.Merge.matches_exclude?("gpt-4", [~r/^gpt-5-.*$/])
       false
   """
   @spec matches_exclude?(String.t() | nil, [String.t() | Regex.t()]) :: boolean()

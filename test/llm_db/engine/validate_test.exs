@@ -1,7 +1,7 @@
-defmodule LLMDb.Engine.ValidateTest do
+defmodule LLMDB.Engine.ValidateTest do
   use ExUnit.Case, async: true
 
-  alias LLMDb.Validate
+  alias LLMDB.Validate
 
   describe "validate_provider/1" do
     test "validates minimal valid provider" do

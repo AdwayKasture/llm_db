@@ -1,10 +1,10 @@
-defmodule LLMDb.Engine.EnrichTest do
+defmodule LLMDB.Engine.EnrichTest do
   use ExUnit.Case, async: true
 
-  alias LLMDb.Enrich
-  alias LLMDb.Test.Fixtures
+  alias LLMDB.Enrich
+  alias LLMDB.Test.Fixtures
 
-  doctest LLMDb.Enrich
+  doctest LLMDB.Enrich
 
   describe "derive_family/1" do
     test "derives family from gpt-* models" do
@@ -212,7 +212,7 @@ defmodule LLMDb.Engine.EnrichTest do
 
   describe "integration with validation" do
     test "enrichment works before validation" do
-      alias LLMDb.Validate
+      alias LLMDB.Validate
 
       raw_model = Fixtures.model_with_derivable_family(%{id: "test-model-v2-mini"})
 
@@ -228,7 +228,7 @@ defmodule LLMDb.Engine.EnrichTest do
     end
 
     test "batch enrichment works before batch validation" do
-      alias LLMDb.Validate
+      alias LLMDB.Validate
 
       raw_models = [
         %{id: "test-model-v1", provider: :test_provider_alpha},
@@ -245,7 +245,7 @@ defmodule LLMDb.Engine.EnrichTest do
     end
 
     test "enrichment preserves complex nested structures for validation" do
-      alias LLMDb.Validate
+      alias LLMDB.Validate
 
       raw_model = %{
         id: "test-model-v2-advanced",

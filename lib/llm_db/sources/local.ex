@@ -1,4 +1,4 @@
-defmodule LLMDb.Sources.Local do
+defmodule LLMDB.Sources.Local do
   @moduledoc """
   Loads model metadata from local TOML files in a directory structure.
 
@@ -37,7 +37,7 @@ defmodule LLMDb.Sources.Local do
 
   require Logger
 
-  @behaviour LLMDb.Source
+  @behaviour LLMDB.Source
 
   @impl true
   def load(%{dir: dir} = opts) when is_binary(dir) do

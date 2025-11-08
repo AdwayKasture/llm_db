@@ -21,7 +21,7 @@ body:
       label: Steps to Reproduce
       description: Minimal steps to reproduce the issue
       placeholder: |
-        1. Call LLMDb.Store.get(:custom_provider)
+        1. Call LLMDB.Store.get(:custom_provider)
         2. Observe crash
     validations:
       required: true

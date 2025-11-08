@@ -1,4 +1,4 @@
-defmodule LLMDb.Validate do
+defmodule LLMDB.Validate do
   @moduledoc """
   Validation functions for providers and models using Zoi schemas.
 
@@ -8,7 +8,7 @@ defmodule LLMDb.Validate do
 
   require Logger
 
-  alias LLMDb.{Model, Provider}
+  alias LLMDB.{Model, Provider}
 
   @type validation_error :: term()
 

@@ -1,7 +1,7 @@
-defmodule LLMDb.ConsumerFilteringTest do
+defmodule LLMDB.ConsumerFilteringTest do
   use ExUnit.Case, async: false
 
-  alias LLMDb.Sources.Config, as: ConfigSource
+  alias LLMDB.Sources.Config, as: ConfigSource
 
   setup do
     # Save original config
@@ -15,7 +15,7 @@ defmodule LLMDb.ConsumerFilteringTest do
       Application.put_all_env(llm_db: original_config)
 
       # Reload with default config
-      LLMDb.load()
+      LLMDB.load()
     end)
 
     :ok
@@ -32,11 +32,11 @@ defmodule LLMDb.ConsumerFilteringTest do
       })
 
       # Load packaged snapshot (will be filtered)
-      {:ok, _snapshot} = LLMDb.load()
+      {:ok, _snapshot} = LLMDB.load()
 
       # Test with actual packaged models - Haiku models should be visible
       # Check anthropic provider
-      anthropic_models = LLMDb.models(:anthropic)
+      anthropic_models = LLMDB.models(:anthropic)
 
       if length(anthropic_models) > 0 do
         # Should only contain haiku models
@@ -45,8 +45,8 @@ defmodule LLMDb.ConsumerFilteringTest do
                end)
       end
 
-      # Check openrouter provider  
-      openrouter_models = LLMDb.models(:openrouter)
+      # Check openrouter provider
+      openrouter_models = LLMDB.models(:openrouter)
 
       if length(openrouter_models) > 0 do
         # Should only contain haiku models
@@ -56,7 +56,7 @@ defmodule LLMDb.ConsumerFilteringTest do
       end
 
       # OpenAI models should not be visible (provider not in allow)
-      openai_models = LLMDb.models(:openai)
+      openai_models = LLMDB.models(:openai)
       assert length(openai_models) == 0
     end
 
@@ -77,10 +77,10 @@ defmodule LLMDb.ConsumerFilteringTest do
       })
 
       {:ok, _snapshot} =
-        LLMDb.load(runtime_overrides: %{sources: [{ConfigSource, %{overrides: test_data}}]})
+        LLMDB.load(runtime_overrides: %{sources: [{ConfigSource, %{overrides: test_data}}]})
 
-      assert {:ok, _model} = LLMDb.model(:anthropic, "claude-3-haiku-20240307")
-      assert {:error, :not_found} = LLMDb.model(:anthropic, "claude-3-opus-20240229")
+      assert {:ok, _model} = LLMDB.model(:anthropic, "claude-3-haiku-20240307")
+      assert {:error, :not_found} = LLMDB.model(:anthropic, "claude-3-opus-20240229")
     end
 
     test "warns on unknown providers in filters" do
@@ -102,7 +102,7 @@ defmodule LLMDb.ConsumerFilteringTest do
       # Should warn but still succeed
       assert capture_log(fn ->
                {:ok, _snapshot} =
-                 LLMDb.load(
+                 LLMDB.load(
                    runtime_overrides: %{sources: [{ConfigSource, %{overrides: test_data}}]}
                  )
              end) =~ "unknown provider(s) in filter: [:unknown_provider]"
@@ -135,7 +135,7 @@ defmodule LLMDb.ConsumerFilteringTest do
 
       # Should return error because no models match the allow patterns
       assert {:error, error_msg} =
-               LLMDb.load(
+               LLMDB.load(
                  runtime_overrides: %{sources: [{ConfigSource, %{overrides: test_data}}]}
                )
 
@@ -148,10 +148,10 @@ defmodule LLMDb.ConsumerFilteringTest do
         allow: %{anthropic: ["claude-3-haiku-*"]}
       })
 
-      {:ok, _snapshot} = LLMDb.load()
+      {:ok, _snapshot} = LLMDB.load()
 
       # Only Haiku models visible
-      anthropic_models = LLMDb.models(:anthropic)
+      anthropic_models = LLMDB.models(:anthropic)
 
       if length(anthropic_models) > 0 do
         assert Enum.all?(anthropic_models, fn model ->
@@ -161,13 +161,13 @@ defmodule LLMDb.ConsumerFilteringTest do
 
       # Override at runtime to allow Opus/Sonnet models instead
       {:ok, _snapshot} =
-        LLMDb.load(
+        LLMDB.load(
           allow: %{anthropic: ["claude-3-opus-*", "claude-3.5-sonnet-*"]},
           deny: %{}
         )
 
       # Now Opus/Sonnet visible, Haiku not
-      anthropic_models = LLMDb.models(:anthropic)
+      anthropic_models = LLMDB.models(:anthropic)
 
       if length(anthropic_models) > 0 do
         refute Enum.any?(anthropic_models, fn model ->
@@ -194,12 +194,12 @@ defmodule LLMDb.ConsumerFilteringTest do
       })
 
       {:ok, _snapshot} =
-        LLMDb.load(runtime_overrides: %{sources: [{ConfigSource, %{overrides: test_data}}]})
+        LLMDB.load(runtime_overrides: %{sources: [{ConfigSource, %{overrides: test_data}}]})
 
       # Haiku allowed except legacy
-      assert {:ok, _} = LLMDb.model(:anthropic, "claude-3-haiku-20240307")
-      assert {:error, :not_found} = LLMDb.model(:anthropic, "claude-3-haiku-legacy")
-      assert {:error, :not_found} = LLMDb.model(:anthropic, "claude-3-opus-20240229")
+      assert {:ok, _} = LLMDB.model(:anthropic, "claude-3-haiku-20240307")
+      assert {:error, :not_found} = LLMDB.model(:anthropic, "claude-3-haiku-legacy")
+      assert {:error, :not_found} = LLMDB.model(:anthropic, "claude-3-opus-20240229")
     end
   end
 

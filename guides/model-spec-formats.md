@@ -1,10 +1,10 @@
 # Model Spec Formats
 
-Model specifications in LLMDb can be expressed in multiple formats to suit different use cases. This guide covers the supported formats and when to use each one.
+Model specifications in LLMDB can be expressed in multiple formats to suit different use cases. This guide covers the supported formats and when to use each one.
 
 ## Overview
 
-A **model spec** uniquely identifies an LLM model by combining a provider identifier and a model ID. LLMDb supports three formats:
+A **model spec** uniquely identifies an LLM model by combining a provider identifier and a model ID. LLMDB supports three formats:
 
 1. **Colon format** (`"provider:model"`) - Traditional, human-readable
 2. **@ format** (`"model@provider"`) - Filesystem-safe, email-like
@@ -34,15 +34,15 @@ All three formats can be used interchangeably throughout the API.
 ### Parsing
 
 ```elixir
-{:ok, {:openai, "gpt-4o-mini"}} = LLMDb.parse("openai:gpt-4o-mini")
+{:ok, {:openai, "gpt-4o-mini"}} = LLMDB.parse("openai:gpt-4o-mini")
 ```
 
 ### Formatting
 
 ```elixir
-"openai:gpt-4o-mini" = LLMDb.format({:openai, "gpt-4o-mini"})
+"openai:gpt-4o-mini" = LLMDB.format({:openai, "gpt-4o-mini"})
 # or explicitly
-"openai:gpt-4o-mini" = LLMDb.format({:openai, "gpt-4o-mini"}, :provider_colon_model)
+"openai:gpt-4o-mini" = LLMDB.format({:openai, "gpt-4o-mini"}, :provider_colon_model)
 ```
 
 ## @ Format (Filename-Safe)
@@ -61,12 +61,12 @@ All three formats can be used interchangeably throughout the API.
 ### When to Use
 - **Filenames**: Template files, cache files, logs
   ```elixir
-  template_file = "system-prompt-#{LLMDb.format(spec, :filename_safe)}.liquid"
+  template_file = "system-prompt-#{LLMDB.format(spec, :filename_safe)}.liquid"
   # => "system-prompt-gpt-4o-mini@openai.liquid"
   ```
 - **CI/CD artifacts**: Build artifacts, test results, benchmark data
   ```elixir
-  artifact_path = "benchmarks/#{LLMDb.format(spec, :filename_safe)}/#{date}.json"
+  artifact_path = "benchmarks/#{LLMDB.format(spec, :filename_safe)}/#{date}.json"
   # => "benchmarks/gpt-4o-mini@openai/2025-11-07.json"
   ```
 - **URLs and paths**: S3 keys, API endpoints, file paths
@@ -75,15 +75,15 @@ All three formats can be used interchangeably throughout the API.
 ### Parsing
 
 ```elixir
-{:ok, {:openai, "gpt-4o-mini"}} = LLMDb.parse("gpt-4o-mini@openai")
+{:ok, {:openai, "gpt-4o-mini"}} = LLMDB.parse("gpt-4o-mini@openai")
 ```
 
 ### Formatting
 
 ```elixir
-"gpt-4o-mini@openai" = LLMDb.format({:openai, "gpt-4o-mini"}, :filename_safe)
+"gpt-4o-mini@openai" = LLMDB.format({:openai, "gpt-4o-mini"}, :filename_safe)
 # or
-"gpt-4o-mini@openai" = LLMDb.format({:openai, "gpt-4o-mini"}, :model_at_provider)
+"gpt-4o-mini@openai" = LLMDB.format({:openai, "gpt-4o-mini"}, :model_at_provider)
 ```
 
 ## Tuple Format (Internal)
@@ -109,25 +109,25 @@ All three formats can be used interchangeably throughout the API.
 
 ```elixir
 # Parse to tuple
-{:openai, "gpt-4o-mini"} = LLMDb.parse!("openai:gpt-4o-mini")
+{:openai, "gpt-4o-mini"} = LLMDB.parse!("openai:gpt-4o-mini")
 
 # Format from tuple
-"openai:gpt-4o-mini" = LLMDb.format({:openai, "gpt-4o-mini"})
+"openai:gpt-4o-mini" = LLMDB.format({:openai, "gpt-4o-mini"})
 ```
 
 ## Format Conversion
 
-Use `LLMDb.build/2` to convert between formats:
+Use `LLMDB.build/2` to convert between formats:
 
 ```elixir
 # Colon to @
-"gpt-4@openai" = LLMDb.build("openai:gpt-4", format: :filename_safe)
+"gpt-4@openai" = LLMDB.build("openai:gpt-4", format: :filename_safe)
 
 # @ to colon
-"openai:gpt-4" = LLMDb.build("gpt-4@openai", format: :provider_colon_model)
+"openai:gpt-4" = LLMDB.build("gpt-4@openai", format: :provider_colon_model)
 
 # Tuple to @
-"gpt-4@openai" = LLMDb.build({:openai, "gpt-4"}, format: :model_at_provider)
+"gpt-4@openai" = LLMDB.build({:openai, "gpt-4"}, format: :model_at_provider)
 ```
 
 ## Automatic Format Detection
@@ -136,12 +136,12 @@ All parsing functions automatically detect which format you're using:
 
 ```elixir
 # Both work seamlessly
-{:ok, model} = LLMDb.model("openai:gpt-4o-mini")
-{:ok, model} = LLMDb.model("gpt-4o-mini@openai")
+{:ok, model} = LLMDB.model("openai:gpt-4o-mini")
+{:ok, model} = LLMDB.model("gpt-4o-mini@openai")
 
 # Parsing detects format automatically
-{:ok, spec} = LLMDb.parse("openai:gpt-4")  # detects colon format
-{:ok, spec} = LLMDb.parse("gpt-4@openai")  # detects @ format
+{:ok, spec} = LLMDB.parse("openai:gpt-4")  # detects colon format
+{:ok, spec} = LLMDB.parse("gpt-4@openai")  # detects @ format
 ```
 
 ## Ambiguous Input
@@ -150,11 +150,11 @@ If a spec contains both `:` and `@`, you must specify the format explicitly:
 
 ```elixir
 # This is ambiguous - error!
-{:error, :ambiguous_format} = LLMDb.parse("provider:model@test")
+{:error, :ambiguous_format} = LLMDB.parse("provider:model@test")
 
 # Specify the format explicitly
-{:ok, {:provider, "model@test"}} = LLMDb.parse("provider:model@test", format: :colon)
-{:ok, {:test, "provider:model"}} = LLMDb.parse("provider:model@test", format: :at)
+{:ok, {:provider, "model@test"}} = LLMDB.parse("provider:model@test", format: :colon)
+{:ok, {:test, "provider:model"}} = LLMDB.parse("provider:model@test", format: :at)
 ```
 
 ## Validation Rules
@@ -189,7 +189,7 @@ Per-call overrides always take precedence:
 
 ```elixir
 # Even if config says :model_at_provider, this returns colon format
-"openai:gpt-4" = LLMDb.format(spec, :provider_colon_model)
+"openai:gpt-4" = LLMDB.format(spec, :provider_colon_model)
 ```
 
 ## Use Case Examples
@@ -200,7 +200,7 @@ Per-call overrides always take precedence:
 defmodule MyApp.PromptLoader do
   def load(model_spec, template_name) do
     # Use @ format for filename safety
-    model_str = LLMDb.format(model_spec, :filename_safe)
+    model_str = LLMDB.format(model_spec, :filename_safe)
     path = Path.join(["templates", "#{template_name}-#{model_str}.liquid"])
     
     File.read!(path)
@@ -218,7 +218,7 @@ defmodule MyApp.LLMWorker do
   def new(model_spec, prompt) do
     %{
       # Store as filename-safe string
-      model: LLMDb.format(model_spec, :filename_safe),
+      model: LLMDB.format(model_spec, :filename_safe),
       prompt: prompt
     }
     |> __MODULE__.new()
@@ -227,10 +227,10 @@ defmodule MyApp.LLMWorker do
   @impl Oban.Worker
   def perform(%Oban.Job{args: %{"model" => model_str, "prompt" => prompt}}) do
     # Parse from either format
-    {:ok, {provider, model_id}} = LLMDb.parse(model_str)
+    {:ok, {provider, model_id}} = LLMDB.parse(model_str)
     
     # Use the spec
-    {:ok, model} = LLMDb.model(provider, model_id)
+    {:ok, model} = LLMDB.model(provider, model_id)
     # ...
   end
 end
@@ -242,7 +242,7 @@ end
 defmodule MyApp.Cache do
   def cache_key(model_spec, input_hash) do
     # Use @ format for S3/filesystem compatibility
-    model_str = LLMDb.format(model_spec, :filename_safe)
+    model_str = LLMDB.format(model_spec, :filename_safe)
     "llm-cache/#{model_str}/#{input_hash}.json"
     # => "llm-cache/gpt-4o-mini@openai/abc123.json"
   end
@@ -254,7 +254,7 @@ end
 ```elixir
 defmodule MyApp.Benchmark do
   def artifact_path(model_spec, timestamp) do
-    model_str = LLMDb.format(model_spec, :filename_safe)
+    model_str = LLMDB.format(model_spec, :filename_safe)
     Path.join([
       "benchmark-results",
       model_str,
@@ -276,11 +276,11 @@ No migration needed - just use the new format going forward:
 ```elixir
 # Old data uses colon format
 old_spec = "openai:gpt-4"
-{:ok, model} = LLMDb.model(old_spec)  # still works
+{:ok, model} = LLMDB.model(old_spec)  # still works
 
 # New data uses @ format
-new_spec = LLMDb.format({:openai, "gpt-4"}, :filename_safe)
-{:ok, model} = LLMDb.model(new_spec)  # also works
+new_spec = LLMDB.format({:openai, "gpt-4"}, :filename_safe)
+{:ok, model} = LLMDB.model(new_spec)  # also works
 ```
 
 ### Option 2: Migrate Stored Data
@@ -293,10 +293,10 @@ defmodule MyApp.MigrateSpecs do
     MyApp.Repo.all(MyApp.Record)
     |> Enum.each(fn record ->
       # Parse old format
-      {:ok, spec} = LLMDb.parse(record.model_spec)
+      {:ok, spec} = LLMDB.parse(record.model_spec)
       
       # Format in new format
-      new_spec = LLMDb.format(spec, :model_at_provider)
+      new_spec = LLMDB.format(spec, :model_at_provider)
       
       # Update record
       record
@@ -317,10 +317,10 @@ config :llm_db,
   model_spec_format: :model_at_provider
 ```
 
-Now all `LLMDb.format/1` calls (without explicit format) return `@` format:
+Now all `LLMDB.format/1` calls (without explicit format) return `@` format:
 
 ```elixir
-"gpt-4@openai" = LLMDb.format({:openai, "gpt-4"})
+"gpt-4@openai" = LLMDB.format({:openai, "gpt-4"})
 ```
 
 ## Best Practices
@@ -340,4 +340,4 @@ Now all `LLMDb.format/1` calls (without explicit format) return `@` format:
 | @ | `"model@provider"` | Filenames, URLs, cross-platform | `"gpt-4o-mini@openai"` |
 | Tuple | `{:provider, "model"}` | Internal, performance-critical | `{:openai, "gpt-4o-mini"}` |
 
-All three formats are fully supported and can be used interchangeably throughout the LLMDb API.
+All three formats are fully supported and can be used interchangeably throughout the LLMDB API.

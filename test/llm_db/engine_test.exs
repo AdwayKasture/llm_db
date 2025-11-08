@@ -1,7 +1,7 @@
-defmodule LLMDb.EngineTest do
+defmodule LLMDB.EngineTest do
   use ExUnit.Case, async: true
 
-  alias LLMDb.Engine
+  alias LLMDB.Engine
 
   setup do
     # Clear any polluted application env
@@ -34,7 +34,7 @@ defmodule LLMDb.EngineTest do
       models: get_in(config, [:overrides, :models]) || []
     }
 
-    sources = [{LLMDb.Sources.Config, %{overrides: overrides}}]
+    sources = [{LLMDB.Sources.Config, %{overrides: overrides}}]
 
     # Set application env for filters
     if Map.has_key?(config, :allow), do: Application.put_env(:llm_db, :allow, config.allow)
@@ -46,7 +46,7 @@ defmodule LLMDb.EngineTest do
 
   describe "run/1" do
     test "runs complete ETL pipeline with test data" do
-      sources = [{LLMDb.Sources.Config, %{overrides: minimal_test_data()}}]
+      sources = [{LLMDB.Sources.Config, %{overrides: minimal_test_data()}}]
       {:ok, snapshot} = Engine.run(sources: sources)
 
       assert is_map(snapshot)
@@ -167,7 +167,7 @@ defmodule LLMDb.EngineTest do
       ]
 
       {filters, _unknown_info} =
-        LLMDb.Config.compile_filters(
+        LLMDB.Config.compile_filters(
           %{provider_a: ["*"]},
           %{provider_a: ["model-a2"]}
         )
@@ -196,7 +196,7 @@ defmodule LLMDb.EngineTest do
     test "unions accumulative list fields across sources" do
       # First source (lower precedence)
       source1 =
-        {LLMDb.Sources.Config,
+        {LLMDB.Sources.Config,
          %{
            overrides: %{
              providers: [%{id: :openai, name: "OpenAI"}],
@@ -214,7 +214,7 @@ defmodule LLMDb.EngineTest do
 
       # Second source (higher precedence)
       source2 =
-        {LLMDb.Sources.Config,
+        {LLMDB.Sources.Config,
          %{
            overrides: %{
              providers: [],
@@ -245,7 +245,7 @@ defmodule LLMDb.EngineTest do
     test "replaces non-accumulative lists with last-wins" do
       # First source (lower precedence)
       source1 =
-        {LLMDb.Sources.Config,
+        {LLMDB.Sources.Config,
          %{
            overrides: %{
              providers: [%{id: :openai, name: "OpenAI"}],
@@ -261,7 +261,7 @@ defmodule LLMDb.EngineTest do
 
       # Second source (higher precedence)
       source2 =
-        {LLMDb.Sources.Config,
+        {LLMDB.Sources.Config,
          %{
            overrides: %{
              providers: [],
@@ -285,7 +285,7 @@ defmodule LLMDb.EngineTest do
     test "removes duplicates when unioning lists" do
       # First source
       source1 =
-        {LLMDb.Sources.Config,
+        {LLMDB.Sources.Config,
          %{
            overrides: %{
              providers: [%{id: :openai, name: "OpenAI"}],
@@ -302,7 +302,7 @@ defmodule LLMDb.EngineTest do
 
       # Second source with some duplicates
       source2 =
-        {LLMDb.Sources.Config,
+        {LLMDB.Sources.Config,
          %{
            overrides: %{
              providers: [],
@@ -328,7 +328,7 @@ defmodule LLMDb.EngineTest do
     test "handles empty lists in union" do
       # First source with populated lists
       source1 =
-        {LLMDb.Sources.Config,
+        {LLMDB.Sources.Config,
          %{
            overrides: %{
              providers: [%{id: :openai, name: "OpenAI"}],
@@ -345,7 +345,7 @@ defmodule LLMDb.EngineTest do
 
       # Second source with empty lists
       source2 =
-        {LLMDb.Sources.Config,
+        {LLMDB.Sources.Config,
          %{
            overrides: %{
              providers: [],
@@ -371,7 +371,7 @@ defmodule LLMDb.EngineTest do
     test "unions lists across multiple sources" do
       # Three sources with different data
       source1 =
-        {LLMDb.Sources.Config,
+        {LLMDB.Sources.Config,
          %{
            overrides: %{
              providers: [%{id: :openai, name: "OpenAI"}],
@@ -387,7 +387,7 @@ defmodule LLMDb.EngineTest do
          }}
 
       source2 =
-        {LLMDb.Sources.Config,
+        {LLMDB.Sources.Config,
          %{
            overrides: %{
              providers: [],
@@ -403,7 +403,7 @@ defmodule LLMDb.EngineTest do
          }}
 
       source3 =
-        {LLMDb.Sources.Config,
+        {LLMDB.Sources.Config,
          %{
            overrides: %{
              providers: [],

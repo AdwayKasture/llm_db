@@ -1,7 +1,7 @@
-defmodule LLMDb.SourcesTest do
+defmodule LLMDB.SourcesTest do
   use ExUnit.Case, async: true
 
-  alias LLMDb.Sources.{Config, Local}
+  alias LLMDB.Sources.{Config, Local}
 
   describe "Local source" do
     test "loads providers and models from TOML directory structure" do

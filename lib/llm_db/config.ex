@@ -1,6 +1,6 @@
-defmodule LLMDb.Config do
+defmodule LLMDB.Config do
   @moduledoc """
-  Configuration reading and normalization for LLMDb.
+  Configuration reading and normalization for LLMDB.
 
   Reads from Application environment and provides normalized config maps
   and compiled filter patterns.
@@ -17,8 +17,8 @@ defmodule LLMDb.Config do
 
       config :llm_db,
         sources: [
-          {LLMDb.Sources.ModelsDev, %{}},
-          {LLMDb.Sources.Local, %{dir: "priv/llm_db"}}
+          {LLMDB.Sources.ModelsDev, %{}},
+          {LLMDB.Sources.Local, %{dir: "priv/llm_db"}}
         ]
 
   ## Default Behavior
@@ -115,7 +115,7 @@ defmodule LLMDb.Config do
   - `deny` - `%{provider_atom => [pattern_strings]}`
   - `known_providers` - Optional list of known provider atoms for validation (defaults to all existing atoms)
 
-  Patterns support glob syntax with `*` wildcards via `LLMDb.Merge.compile_pattern/1`.
+  Patterns support glob syntax with `*` wildcards via `LLMDB.Merge.compile_pattern/1`.
 
   Provider keys that don't correspond to existing atoms are silently ignored.
 
@@ -165,7 +165,7 @@ defmodule LLMDb.Config do
                   r
 
                 s when is_binary(s) ->
-                  LLMDb.Merge.compile_pattern(s)
+                  LLMDB.Merge.compile_pattern(s)
 
                 other ->
                   raise ArgumentError,

@@ -1,4 +1,4 @@
-defmodule LLMDb.Test.Fixtures do
+defmodule LLMDB.Test.Fixtures do
   @moduledoc """
   Synthetic test data fixtures for LLM model testing.
 
@@ -30,10 +30,10 @@ defmodule LLMDb.Test.Fixtures do
 
       # Use as-is
       provider = provider_alpha()
-      
+
       # Override specific fields
       provider = provider_alpha(%{name: "Custom Name"})
-      
+
       # Create model with family
       model = model_with_family("test-family-v1", %{id: "custom-id"})
   """

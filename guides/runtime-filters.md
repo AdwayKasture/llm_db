@@ -4,10 +4,10 @@ Runtime filtering allows you to control which models are visible at load-time an
 
 ## Overview
 
-LLMDb separates build-time and load-time concerns:
+LLMDB separates build-time and load-time concerns:
 
 - **Build-time** (Engine): Produces complete, unfiltered snapshots from sources
-- **Load-time** (LLMDb.load): Applies filters and builds indexes
+- **Load-time** (LLMDB.load): Applies filters and builds indexes
 - **Runtime** (Runtime.apply): Updates filters dynamically without reload
 
 The `base_models` list stored in the snapshot enables widening filters later without rebuilding from sources.
@@ -128,7 +128,7 @@ config :llm_db,
 Then override at runtime to switch to different models:
 
 ```elixir
-{:ok, _snapshot} = LLMDb.load(
+{:ok, _snapshot} = LLMDB.load(
   runtime_overrides: %{
     filter: %{
       allow: %{
@@ -146,10 +146,10 @@ For hot updates during runtime without calling `load/1`:
 
 ```elixir
 # Get current snapshot
-snapshot = LLMDb.Store.snapshot()
+snapshot = LLMDB.Store.snapshot()
 
 # Apply new filters
-{:ok, updated_snapshot} = LLMDb.Runtime.apply(snapshot, %{
+{:ok, updated_snapshot} = LLMDB.Runtime.apply(snapshot, %{
   filter: %{
     allow: %{openai: ["gpt-4o-*"]},
     deny: %{openai: ["*-preview"]}
@@ -157,7 +157,7 @@ snapshot = LLMDb.Store.snapshot()
 })
 
 # Update store (atomic swap)
-LLMDb.Store.put!(updated_snapshot)
+LLMDB.Store.put!(updated_snapshot)
 ```
 
 The `Runtime.apply/2` function:
@@ -168,12 +168,12 @@ The `Runtime.apply/2` function:
 
 ## Runtime Overrides
 
-### Via LLMDb.load/1
+### Via LLMDB.load/1
 
 Pass `runtime_overrides` to override config at load time:
 
 ```elixir
-{:ok, _snapshot} = LLMDb.load(
+{:ok, _snapshot} = LLMDB.load(
   runtime_overrides: %{
     filter: %{allow: %{...}, deny: %{...}},
     prefer: [:openai, :anthropic]
@@ -183,18 +183,18 @@ Pass `runtime_overrides` to override config at load time:
 
 Runtime overrides take precedence over application config.
 
-### Via LLMDb.Runtime.apply/2
+### Via LLMDB.Runtime.apply/2
 
 For updates without reloading:
 
 ```elixir
-snapshot = LLMDb.Store.snapshot()
+snapshot = LLMDB.Store.snapshot()
 
-{:ok, updated_snapshot} = LLMDb.Runtime.apply(snapshot, %{
+{:ok, updated_snapshot} = LLMDB.Runtime.apply(snapshot, %{
   filter: %{...}
 })
 
-LLMDb.Store.put!(updated_snapshot)
+LLMDB.Store.put!(updated_snapshot)
 ```
 
 ## Error Handling and Troubleshooting
@@ -234,7 +234,7 @@ Check spelling or remove unknown providers from configuration.
 
 **Solutions:**
 1. Check spelling: `:openai` not `:open_ai`
-2. Verify provider exists: `LLMDb.providers()` or `LLMDb.list_providers()`
+2. Verify provider exists: `LLMDB.providers()` or `LLMDB.list_providers()`
 3. Remove unknown provider from config
 
 ### Nothing shows for provider X
@@ -263,14 +263,14 @@ config :llm_db,
 ### Check what's allowed
 
 ```elixir
-LLMDb.allowed?("openai:gpt-4o-mini")  
+LLMDB.allowed?("openai:gpt-4o-mini")  
 #=> true or false
 
-LLMDb.allowed?({:openai, "gpt-4o-preview"})
+LLMDB.allowed?({:openai, "gpt-4o-preview"})
 #=> false (if denied by pattern)
 
-{:ok, model} = LLMDb.model("openai:gpt-4o-mini")
-LLMDb.allowed?(model)
+{:ok, model} = LLMDB.model("openai:gpt-4o-mini")
+LLMDB.allowed?(model)
 #=> true
 ```
 
@@ -301,17 +301,17 @@ Runtime filter updates can widen or narrow because they operate on `base_models`
 
 ```elixir
 # Start narrow
-LLMDb.load(runtime_overrides: %{
+LLMDB.load(runtime_overrides: %{
   filter: %{allow: %{anthropic: ["claude-3-haiku-*"]}, deny: %{}}
 })
 #=> Only Haiku models visible
 
 # Widen later
-snapshot = LLMDb.Store.snapshot()
-{:ok, snapshot} = LLMDb.Runtime.apply(snapshot, %{
+snapshot = LLMDB.Store.snapshot()
+{:ok, snapshot} = LLMDB.Runtime.apply(snapshot, %{
   filter: %{allow: %{anthropic: ["claude-3-*"]}, deny: %{}}
 })
-LLMDb.Store.put!(snapshot)
+LLMDB.Store.put!(snapshot)
 #=> All Claude 3 models now visible (pulled from base_models)
 ```
 

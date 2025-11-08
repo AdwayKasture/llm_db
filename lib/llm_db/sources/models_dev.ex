@@ -1,4 +1,4 @@
-defmodule LLMDb.Sources.ModelsDev do
+defmodule LLMDB.Sources.ModelsDev do
   @moduledoc """
   Remote source for models.dev metadata (https://models.dev/api.json).
 
@@ -28,7 +28,7 @@ defmodule LLMDb.Sources.ModelsDev do
       {:ok, data} = ModelsDev.load(%{})
   """
 
-  @behaviour LLMDb.Source
+  @behaviour LLMDB.Source
 
   require Logger
 

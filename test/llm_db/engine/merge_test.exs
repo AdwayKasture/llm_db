@@ -1,8 +1,8 @@
-defmodule LLMDb.Engine.MergeTest do
+defmodule LLMDB.Engine.MergeTest do
   use ExUnit.Case, async: true
-  alias LLMDb.Merge
+  alias LLMDB.Merge
 
-  doctest LLMDb.Merge
+  doctest LLMDB.Merge
 
   describe "merge/3 scalar values" do
     test "higher precedence wins on scalar conflict" do

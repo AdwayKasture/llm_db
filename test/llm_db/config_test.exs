@@ -1,6 +1,6 @@
-defmodule LLMDb.ConfigTest do
+defmodule LLMDB.ConfigTest do
   use ExUnit.Case, async: false
-  doctest LLMDb.Config
+  doctest LLMDB.Config
 
   setup do
     original_config = Application.get_all_env(:llm_db)
@@ -15,7 +15,7 @@ defmodule LLMDb.ConfigTest do
       Application.put_all_env(llm_db: original_config)
 
       # Reload to reset state
-      LLMDb.load()
+      LLMDB.load()
     end)
 
     :ok
@@ -28,7 +28,7 @@ defmodule LLMDb.ConfigTest do
       Application.delete_env(:llm_db, :deny)
       Application.delete_env(:llm_db, :prefer)
 
-      config = LLMDb.Config.get()
+      config = LLMDB.Config.get()
 
       assert config.compile_embed == false
       assert config.allow == :all
@@ -40,7 +40,7 @@ defmodule LLMDb.ConfigTest do
       Application.put_env(:llm_db, :compile_embed, true)
       Application.put_env(:llm_db, :prefer, [:openai, :anthropic])
 
-      config = LLMDb.Config.get()
+      config = LLMDB.Config.get()
 
       assert config.compile_embed == true
       assert config.prefer == [:openai, :anthropic]
@@ -49,7 +49,7 @@ defmodule LLMDb.ConfigTest do
 
   describe "compile_filters/2" do
     test "compiles :all allow pattern" do
-      {result, unknown: unknown} = LLMDb.Config.compile_filters(:all, %{})
+      {result, unknown: unknown} = LLMDB.Config.compile_filters(:all, %{})
 
       assert result.allow == :all
       assert result.deny == %{}
@@ -60,7 +60,7 @@ defmodule LLMDb.ConfigTest do
       allow = %{openai: ["gpt-4*", "gpt-3*"]}
       deny = %{}
 
-      {result, unknown: unknown} = LLMDb.Config.compile_filters(allow, deny)
+      {result, unknown: unknown} = LLMDB.Config.compile_filters(allow, deny)
 
       assert is_map(result.allow)
       assert Map.has_key?(result.allow, :openai)
@@ -73,7 +73,7 @@ defmodule LLMDb.ConfigTest do
       allow = :all
       deny = %{openai: ["gpt-5*"], anthropic: ["claude-2*"]}
 
-      {result, unknown: unknown} = LLMDb.Config.compile_filters(allow, deny)
+      {result, unknown: unknown} = LLMDB.Config.compile_filters(allow, deny)
 
       assert result.allow == :all
       assert is_map(result.deny)
@@ -88,7 +88,7 @@ defmodule LLMDb.ConfigTest do
       allow = %{openai: ["gpt-4*"]}
       deny = %{openai: ["gpt-4-32k"]}
 
-      {result, unknown: unknown} = LLMDb.Config.compile_filters(allow, deny)
+      {result, unknown: unknown} = LLMDB.Config.compile_filters(allow, deny)
 
       assert is_map(result.allow)
       assert is_map(result.deny)
@@ -98,7 +98,7 @@ defmodule LLMDb.ConfigTest do
     end
 
     test "handles empty patterns" do
-      {result, unknown: unknown} = LLMDb.Config.compile_filters(%{}, %{})
+      {result, unknown: unknown} = LLMDB.Config.compile_filters(%{}, %{})
 
       assert result.allow == %{}
       assert result.deny == %{}
@@ -107,7 +107,7 @@ defmodule LLMDb.ConfigTest do
 
     test "compiled patterns match correctly" do
       allow = %{openai: ["gpt-4*"]}
-      {result, _unknown_info} = LLMDb.Config.compile_filters(allow, %{})
+      {result, _unknown_info} = LLMDB.Config.compile_filters(allow, %{})
 
       [pattern] = result.allow.openai
 
@@ -124,7 +124,7 @@ defmodule LLMDb.ConfigTest do
         deny: %{anthropic: ["*-legacy"]}
       })
 
-      config = LLMDb.Config.get()
+      config = LLMDB.Config.get()
 
       assert config.allow == %{anthropic: ["claude-3-haiku-*"]}
       assert config.deny == %{anthropic: ["*-legacy"]}
@@ -133,7 +133,7 @@ defmodule LLMDb.ConfigTest do
     test ":filter defaults to allow :all and deny %{}" do
       Application.delete_env(:llm_db, :filter)
 
-      config = LLMDb.Config.get()
+      config = LLMDB.Config.get()
 
       assert config.allow == :all
       assert config.deny == %{}
@@ -141,7 +141,7 @@ defmodule LLMDb.ConfigTest do
 
     test "accepts string provider keys" do
       allow = %{"anthropic" => ["claude-*"], "openrouter" => ["*haiku*"]}
-      {result, _unknown_info} = LLMDb.Config.compile_filters(allow, %{})
+      {result, _unknown_info} = LLMDB.Config.compile_filters(allow, %{})
 
       # Should be converted to atoms
       assert is_map(result.allow)
@@ -151,7 +151,7 @@ defmodule LLMDb.ConfigTest do
 
     test "accepts Regex patterns" do
       allow = %{anthropic: [~r/claude-3-haiku.*/]}
-      {result, _unknown_info} = LLMDb.Config.compile_filters(allow, %{})
+      {result, _unknown_info} = LLMDB.Config.compile_filters(allow, %{})
 
       [pattern] = result.allow.anthropic
       assert %Regex{} = pattern
@@ -164,7 +164,7 @@ defmodule LLMDb.ConfigTest do
       assert_raise ArgumentError,
                    ~r/llm_db: filter provider keys must be atoms or strings/,
                    fn ->
-                     LLMDb.Config.compile_filters(allow, %{})
+                     LLMDB.Config.compile_filters(allow, %{})
                    end
     end
 
@@ -174,7 +174,7 @@ defmodule LLMDb.ConfigTest do
       assert_raise ArgumentError,
                    ~r/llm_db: filter pattern must be string or Regex/,
                    fn ->
-                     LLMDb.Config.compile_filters(allow, %{})
+                     LLMDB.Config.compile_filters(allow, %{})
                    end
     end
   end
@@ -190,8 +190,8 @@ defmodule LLMDb.ConfigTest do
 
       Application.put_env(:llm_db, :prefer, [:openai, :anthropic])
 
-      config = LLMDb.Config.get()
-      {filters, _unknown_info} = LLMDb.Config.compile_filters(config.allow, config.deny)
+      config = LLMDB.Config.get()
+      {filters, _unknown_info} = LLMDB.Config.compile_filters(config.allow, config.deny)
 
       assert config.compile_embed == true
       assert config.prefer == [:openai, :anthropic]
@@ -211,8 +211,8 @@ defmodule LLMDb.ConfigTest do
         }
       })
 
-      config = LLMDb.Config.get()
-      {filters, _unknown_info} = LLMDb.Config.compile_filters(config.allow, config.deny)
+      config = LLMDB.Config.get()
+      {filters, _unknown_info} = LLMDB.Config.compile_filters(config.allow, config.deny)
 
       assert is_map(filters.allow)
       assert Map.has_key?(filters.allow, :anthropic)

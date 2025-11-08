@@ -42,11 +42,11 @@ config :llm_db,
 ## Architecture
 
 - **Type**: Elixir library providing fast, persistent_term-backed LLM model metadata catalog
-- **Core modules**: `LLMDb` (main API), `LLMDb.Engine` (ETL pipeline), `LLMDb.Store` (persistent_term storage)
-- **Data structures**: `LLMDb.Provider`, `LLMDb.Model` with Zoi validation schemas in `lib/llm_db/schema/`
+- **Core modules**: `LLMDB` (main API), `LLMDB.Engine` (ETL pipeline), `LLMDB.Store` (persistent_term storage)
+- **Data structures**: `LLMDB.Provider`, `LLMDB.Model` with Zoi validation schemas in `lib/llm_db/schema/`
 - **Storage**: O(1) lock-free queries via `:persistent_term`, snapshot in `priv/llm_db/snapshot.json`
 - **ETL Pipeline**: Ingest → Normalize → Validate → Merge → Enrich → Filter → Index + Publish (7 stages)
-- **Startup**: Catalog automatically loads on application start via `LLMDb.Application` (no manual `load()` needed in IEx or runtime)
+- **Startup**: Catalog automatically loads on application start via `LLMDB.Application` (no manual `load()` needed in IEx or runtime)
 
 ## Code Style
 

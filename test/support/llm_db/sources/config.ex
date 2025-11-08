@@ -1,11 +1,11 @@
-defmodule LLMDb.Sources.Config do
+defmodule LLMDB.Sources.Config do
   @moduledoc """
   TEST-ONLY: Helper for injecting test data in tests.
 
   This module is NOT included in production builds. It exists solely to support
   tests that need to inject provider/model data without creating TOML files.
 
-  Production users should use `LLMDb.Sources.Local` with TOML files for custom
+  Production users should use `LLMDB.Sources.Local` with TOML files for custom
   model definitions.
 
   ## Test Usage
@@ -17,8 +17,8 @@ defmodule LLMDb.Sources.Config do
           models: [%{id: "gpt-4o", provider: :openai}]
         }
       }
-      
-      sources = [{LLMDb.Sources.Config, %{overrides: test_data}}]
+
+      sources = [{LLMDB.Sources.Config, %{overrides: test_data}}]
       {:ok, snapshot} = Engine.run(sources: sources)
 
   ## Supported Formats
@@ -40,7 +40,7 @@ defmodule LLMDb.Sources.Config do
       }
   """
 
-  @behaviour LLMDb.Source
+  @behaviour LLMDB.Source
 
   @impl true
   def load(%{overrides: overrides}) when is_map(overrides) do

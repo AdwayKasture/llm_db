@@ -4,9 +4,9 @@ import Config
 config :llm_db,
   # Default sources for loading model metadata (first = lowest precedence, last = highest)
   sources: [
-    {LLMDb.Sources.ModelsDev, %{}},
-    {LLMDb.Sources.OpenRouter, %{}},
-    {LLMDb.Sources.Local, %{dir: "priv/llm_db/local"}}
+    {LLMDB.Sources.ModelsDev, %{}},
+    {LLMDB.Sources.OpenRouter, %{}},
+    {LLMDB.Sources.Local, %{dir: "priv/llm_db/local"}}
   ],
 
   # Cache directory for remote sources
@@ -16,7 +16,7 @@ config :llm_db,
 
 if Mix.env() == :dev do
   config :git_ops,
-    mix_project: LLMDb.MixProject,
+    mix_project: LLMDB.MixProject,
     changelog_file: "CHANGELOG.md",
     repository_url: "https://github.com/agentjido/llm_db",
     manage_mix_version?: false,

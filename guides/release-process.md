@@ -36,7 +36,7 @@ V2 schema uses nested providers with embedded models:
 
 ```elixir
 # Reads from priv/llm_db/snapshot.json
-{:ok, _} = LLMDb.load()
+{:ok, _} = LLMDB.load()
 ```
 
 Compile-time embed (zero runtime IO):
@@ -158,7 +158,7 @@ CI triggers on tag push: Hex.pm publish, GitHub release, HexDocs publish.
 }
 ```
 
-**Runtime-only indexes** (rebuilt during `LLMDb.load/1`):
+**Runtime-only indexes** (rebuilt during `LLMDB.load/1`):
 - `providers_by_id`
 - `models_by_key`
 - `models_by_provider`
