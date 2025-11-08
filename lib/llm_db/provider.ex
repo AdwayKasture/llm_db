@@ -6,19 +6,36 @@ defmodule LLMDb.Provider do
   environment variables, and documentation.
   """
 
-  @schema LLMDb.Schema.Provider.schema()
+  @config_field_schema Zoi.object(%{
+                         name: Zoi.string(),
+                         type: Zoi.string(),
+                         required: Zoi.boolean() |> Zoi.default(false),
+                         default: Zoi.any() |> Zoi.nullish(),
+                         doc: Zoi.string() |> Zoi.nullish()
+                       })
 
-  @type t :: %__MODULE__{
-          id: atom(),
-          name: String.t() | nil,
-          base_url: String.t() | nil,
-          env: [String.t()] | nil,
-          config_schema: [map()] | nil,
-          doc: String.t() | nil,
-          extra: map() | nil
-        }
+  @schema Zoi.struct(
+            __MODULE__,
+            %{
+              id: Zoi.atom(),
+              name: Zoi.string() |> Zoi.nullish(),
+              base_url: Zoi.string() |> Zoi.nullish(),
+              env: Zoi.array(Zoi.string()) |> Zoi.nullish(),
+              config_schema: Zoi.array(@config_field_schema) |> Zoi.nullish(),
+              doc: Zoi.string() |> Zoi.nullish(),
+              exclude_models: Zoi.array(Zoi.string()) |> Zoi.default([]) |> Zoi.nullish(),
+              extra: Zoi.map() |> Zoi.nullish()
+            },
+            coerce: true
+          )
 
-  defstruct [:id, :name, :base_url, :env, :config_schema, :doc, :extra]
+  @type t :: unquote(Zoi.type_spec(@schema))
+
+  @enforce_keys Zoi.Struct.enforce_keys(@schema)
+  defstruct Zoi.Struct.struct_fields(@schema)
+
+  @doc "Returns the Zoi schema for Provider"
+  def schema, do: @schema
 
   @doc """
   Creates a new Provider struct from a map, validating with Zoi schema.
@@ -33,10 +50,7 @@ defmodule LLMDb.Provider do
   """
   @spec new(map()) :: {:ok, t()} | {:error, term()}
   def new(attrs) when is_map(attrs) do
-    case Zoi.parse(@schema, attrs) do
-      {:ok, validated} -> {:ok, struct(__MODULE__, validated)}
-      {:error, _} = error -> error
-    end
+    Zoi.parse(@schema, attrs)
   end
 
   @doc """
@@ -54,4 +68,24 @@ defmodule LLMDb.Provider do
       {:error, reason} -> raise ArgumentError, "Invalid provider: #{inspect(reason)}"
     end
   end
+end
+
+defimpl DeepMerge.Resolver, for: LLMDb.Provider do
+  @moduledoc false
+
+  def resolve(original, override = %LLMDb.Provider{}, resolver) do
+    cleaned_override =
+      override
+      |> Map.from_struct()
+      |> Enum.reject(fn {_key, value} -> is_nil(value) end)
+      |> Map.new()
+
+    Map.merge(original, cleaned_override, resolver)
+  end
+
+  def resolve(original, override, resolver) when is_map(override) do
+    Map.merge(original, override, resolver)
+  end
+
+  def resolve(_original, override, _resolver), do: override
 end

@@ -95,7 +95,15 @@ defmodule Mix.Tasks.LlmDb.Build do
   end
 
   defp map_with_string_keys(map) when is_map(map) do
-    Map.new(map, fn
+    # Convert struct to plain map first
+    plain_map =
+      if Map.has_key?(map, :__struct__) do
+        Map.from_struct(map)
+      else
+        map
+      end
+
+    Map.new(plain_map, fn
       {k, v} when is_atom(k) -> {Atom.to_string(k), map_with_string_keys(v)}
       {k, v} -> {k, map_with_string_keys(v)}
     end)
