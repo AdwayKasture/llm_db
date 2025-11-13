@@ -76,10 +76,32 @@ defmodule LLMDB.Model do
                            @streaming_schema |> Zoi.default(%{text: true, tool_calls: false})
                        })
 
+  @derive {Jason.Encoder,
+           only: [
+             :id,
+             :model,
+             :provider,
+             :provider_model_id,
+             :name,
+             :family,
+             :release_date,
+             :last_updated,
+             :knowledge,
+             :limits,
+             :cost,
+             :modalities,
+             :capabilities,
+             :tags,
+             :deprecated,
+             :aliases,
+             :extra
+           ]}
+
   @schema Zoi.struct(
             __MODULE__,
             %{
               id: Zoi.string(),
+              model: Zoi.string() |> Zoi.nullish(),
               provider: Zoi.atom(),
               provider_model_id: Zoi.string() |> Zoi.nullish(),
               name: Zoi.string() |> Zoi.nullish(),
@@ -118,13 +140,14 @@ defmodule LLMDB.Model do
   ## Examples
 
       iex> LLMDB.Model.new(%{id: "gpt-4", provider: :openai})
-      {:ok, %LLMDB.Model{id: "gpt-4", provider: :openai}}
+      {:ok, %LLMDB.Model{id: "gpt-4", model: "gpt-4", provider: :openai}}
 
       iex> LLMDB.Model.new(%{})
       {:error, _validation_errors}
   """
   @spec new(map()) :: {:ok, t()} | {:error, term()}
   def new(attrs) when is_map(attrs) do
+    attrs = sync_id_model_fields(attrs)
     Zoi.parse(@schema, attrs)
   end
 
@@ -134,7 +157,7 @@ defmodule LLMDB.Model do
   ## Examples
 
       iex> LLMDB.Model.new!(%{id: "gpt-4", provider: :openai})
-      %LLMDB.Model{id: "gpt-4", provider: :openai}
+      %LLMDB.Model{id: "gpt-4", model: "gpt-4", provider: :openai}
   """
   @spec new!(map()) :: t()
   def new!(attrs) when is_map(attrs) do
@@ -142,6 +165,40 @@ defmodule LLMDB.Model do
       {:ok, model} -> model
       {:error, reason} -> raise ArgumentError, "Invalid model: #{inspect(reason)}"
     end
+  end
+
+  defp sync_id_model_fields(attrs) do
+    id_value = get_field_value(attrs, :id)
+    model_value = get_field_value(attrs, :model)
+
+    cond do
+      is_binary(id_value) and is_binary(model_value) and id_value != model_value ->
+        attrs |> put_field(:id, id_value) |> put_field(:model, id_value)
+
+      is_binary(id_value) and is_nil(model_value) ->
+        put_field(attrs, :model, id_value)
+
+      is_binary(model_value) and is_nil(id_value) ->
+        attrs |> put_field(:id, model_value) |> put_field(:model, model_value)
+
+      true ->
+        attrs
+    end
+  end
+
+  defp get_field_value(attrs, key) do
+    value = attrs[key] || attrs[to_string(key)]
+
+    case value do
+      "" -> nil
+      val -> val
+    end
+  end
+
+  defp put_field(attrs, key, value) do
+    attrs
+    |> Map.put(key, value)
+    |> Map.put(to_string(key), value)
   end
 end
 

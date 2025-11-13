@@ -18,14 +18,11 @@ Build-time operations run during development/CI to prepare data. They do NOT run
 ```bash
 # Fetch from models.dev and cache with HTTP metadata
 mix llm_db.pull
-
-# Fetch from custom URL
-mix llm_db.pull --url https://custom.source/api.json
 ```
 
 **What it does:**
-- Downloads upstream model metadata
-- Caches to `priv/llm_db/upstream/models-dev-<hash>.json`
+- Downloads upstream model metadata (Models.dev and OpenRouter currently)
+- Caches to `priv/llm_db/upstream/models-dev-<hash>.json` and `priv/llm_db/upstream/openrouter-<hash>.json`
 - Stores HTTP metadata (ETag, Last-Modified) in manifest file
 - Generates `lib/llm_db/generated/valid_providers.ex` to prevent atom leaking
 
