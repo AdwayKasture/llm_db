@@ -105,6 +105,7 @@ defmodule LLMDB.Generated.ValidProviders do
     :xai,
     :"z-ai",
     :zai,
+    :zai_coder,
     :zai_coding_plan,
     :zenmux,
     :zhipuai,
