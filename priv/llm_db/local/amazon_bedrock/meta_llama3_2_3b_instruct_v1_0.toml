@@ -1,0 +1,11 @@
+id = "meta.llama3-2-3b-instruct-v1:0"
+name = "Llama 3.2 3B Instruct"
+
+# Inference profile aliases - allow routing across AWS regions
+aliases = [
+  "us.meta.llama3-2-3b-instruct-v1:0",
+  "eu.meta.llama3-2-3b-instruct-v1:0",
+  "ap.meta.llama3-2-3b-instruct-v1:0",
+  "ca.meta.llama3-2-3b-instruct-v1:0",
+  "global.meta.llama3-2-3b-instruct-v1:0"
+]

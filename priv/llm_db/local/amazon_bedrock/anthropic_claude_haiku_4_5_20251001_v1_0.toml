@@ -1,0 +1,11 @@
+id = "anthropic.claude-haiku-4-5-20251001-v1:0"
+name = "Claude Haiku 4.5"
+
+# Inference profile aliases - allow routing across AWS regions
+aliases = [
+  "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+  "eu.anthropic.claude-haiku-4-5-20251001-v1:0",
+  "ap.anthropic.claude-haiku-4-5-20251001-v1:0",
+  "ca.anthropic.claude-haiku-4-5-20251001-v1:0",
+  "global.anthropic.claude-haiku-4-5-20251001-v1:0"
+]

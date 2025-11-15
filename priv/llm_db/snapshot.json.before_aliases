@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-11-15T21:18:16.912988Z",
+  "generated_at": "2025-11-14T22:23:25.204763Z",
   "providers": {
     "z-ai": {
       "base_url": null,
@@ -12630,13 +12630,7 @@
           "tags": null
         },
         "anthropic.claude-haiku-4-5-20251001-v1:0": {
-          "aliases": [
-            "us.anthropic.claude-haiku-4-5-20251001-v1:0",
-            "eu.anthropic.claude-haiku-4-5-20251001-v1:0",
-            "ap.anthropic.claude-haiku-4-5-20251001-v1:0",
-            "ca.anthropic.claude-haiku-4-5-20251001-v1:0",
-            "global.anthropic.claude-haiku-4-5-20251001-v1:0"
-          ],
+          "aliases": [],
           "capabilities": {
             "chat": true,
             "embeddings": false,
@@ -13169,13 +13163,7 @@
           "tags": null
         },
         "anthropic.claude-sonnet-4-5-20250929-v1:0": {
-          "aliases": [
-            "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
-            "eu.anthropic.claude-sonnet-4-5-20250929-v1:0",
-            "ap.anthropic.claude-sonnet-4-5-20250929-v1:0",
-            "ca.anthropic.claude-sonnet-4-5-20250929-v1:0",
-            "global.anthropic.claude-sonnet-4-5-20250929-v1:0"
-          ],
+          "aliases": [],
           "capabilities": {
             "chat": true,
             "embeddings": false,
@@ -13564,13 +13552,7 @@
           "tags": null
         },
         "meta.llama3-2-3b-instruct-v1:0": {
-          "aliases": [
-            "us.meta.llama3-2-3b-instruct-v1:0",
-            "eu.meta.llama3-2-3b-instruct-v1:0",
-            "ap.meta.llama3-2-3b-instruct-v1:0",
-            "ca.meta.llama3-2-3b-instruct-v1:0",
-            "global.meta.llama3-2-3b-instruct-v1:0"
-          ],
+          "aliases": [],
           "capabilities": {
             "chat": true,
             "embeddings": false,
