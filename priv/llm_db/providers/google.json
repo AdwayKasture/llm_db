@@ -792,7 +792,10 @@
           "tool_calls": false
         },
         "tools": {
-          "enabled": true
+          "enabled": true,
+          "parallel": false,
+          "streaming": false,
+          "strict": false
         }
       },
       "cost": {
