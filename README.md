@@ -11,6 +11,17 @@ LLM model metadata catalog with fast, capability-aware lookups. Use simple `"pro
 
 ## Installation
 
+### Igniter Installation
+If your project has [Igniter](https://hexdocs.pm/igniter/readme.html) available,
+you can install LLM DB using the command 
+
+```bash
+mix igniter.install llm_db
+```
+
+### Manual Installation
+Add `llm_db` to your list of dependencies in `mix.exs`:
+
 Model metadata is refreshed regularly, so versions follow [CalVer](https://calver.org/) (`YYYY.M.Patch` with no leading zeros):
 
 ```elixir
