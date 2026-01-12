@@ -60,6 +60,7 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
           XAI_API_KEY: ${{ secrets.XAI_API_KEY }}
+          ZENMUX_API_KEY: ${{ secrets.ZENMUX_API_KEY }}
         run: |
           set -euo pipefail
           echo "Pulling latest LLM model metadata..."
@@ -101,12 +102,12 @@ jobs:
           CHANGED_PROVIDERS=$(git diff --name-only priv/llm_db/providers/ 2>/dev/null | xargs -I{} basename {} .json | sort -u | head -10)
           NEW_PROVIDERS=$(git diff --name-only --diff-filter=A priv/llm_db/providers/ 2>/dev/null | xargs -I{} basename {} .json | sort -u)
           MODIFIED_PROVIDERS=$(git diff --name-only --diff-filter=M priv/llm_db/providers/ 2>/dev/null | xargs -I{} basename {} .json | sort -u)
-          
+
           # Count changes
           NEW_COUNT=$(echo "$NEW_PROVIDERS" | grep -c . || echo 0)
           MOD_COUNT=$(echo "$MODIFIED_PROVIDERS" | grep -c . || echo 0)
           TOTAL_CHANGED=$(echo "$CHANGED_PROVIDERS" | grep -c . || echo 0)
-          
+
           # Build commit message (conventional format)
           if [ "$NEW_COUNT" -gt 0 ] && [ "$MOD_COUNT" -gt 0 ]; then
             COMMIT_TITLE="feat: update model metadata ($NEW_COUNT new, $MOD_COUNT updated)"
@@ -117,27 +118,27 @@ jobs:
           else
             COMMIT_TITLE="chore: refresh model metadata"
           fi
-          
+
           # Build commit body with details
           echo "$COMMIT_TITLE" > "$COMMIT_FILE"
           echo "" >> "$COMMIT_FILE"
-          
+
           if [ -n "$NEW_PROVIDERS" ] && [ "$NEW_PROVIDERS" != "" ]; then
             echo "New providers:" >> "$COMMIT_FILE"
             echo "$NEW_PROVIDERS" | head -5 | sed 's/^/- /' >> "$COMMIT_FILE"
             [ "$NEW_COUNT" -gt 5 ] && echo "- ... and $((NEW_COUNT - 5)) more" >> "$COMMIT_FILE"
             echo "" >> "$COMMIT_FILE"
           fi
-          
+
           if [ -n "$MODIFIED_PROVIDERS" ] && [ "$MODIFIED_PROVIDERS" != "" ]; then
             echo "Updated providers:" >> "$COMMIT_FILE"
             echo "$MODIFIED_PROVIDERS" | head -5 | sed 's/^/- /' >> "$COMMIT_FILE"
             [ "$MOD_COUNT" -gt 5 ] && echo "- ... and $((MOD_COUNT - 5)) more" >> "$COMMIT_FILE"
           fi
-          
+
           # Output for PR title and commit message
           echo "commit_title=$COMMIT_TITLE" >> "$GITHUB_OUTPUT"
-          
+
           # Output multiline commit message for the action
           {
             echo 'commit_message<<EOF'
@@ -172,14 +173,14 @@ jobs:
               echo "" >> "$OUTPUT_FILE"
             fi
           fi
-          
+
           if [ -n "$NEW_PROVIDERS" ] && [ "$NEW_PROVIDERS" != "" ]; then
             echo "### New Providers" >> "$OUTPUT_FILE"
             echo "" >> "$OUTPUT_FILE"
             echo "$NEW_PROVIDERS" | sed 's/^/- `/' | sed 's/$/`/' >> "$OUTPUT_FILE"
             echo "" >> "$OUTPUT_FILE"
           fi
-          
+
           if [ -n "$MODIFIED_PROVIDERS" ] && [ "$MODIFIED_PROVIDERS" != "" ]; then
             echo "### Updated Providers" >> "$OUTPUT_FILE"
             echo "" >> "$OUTPUT_FILE"
