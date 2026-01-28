@@ -3,7 +3,17 @@ defmodule LLMDB.Model do
   Model struct with Zoi schema validation.
 
   Represents an LLM model with complete metadata including identity, provider,
-  dates, limits, costs, modalities, capabilities, tags, lifecycle status, and aliases.
+  dates, limits, costs, pricing, modalities, capabilities, tags, lifecycle status, and aliases.
+
+  ## Pricing Fields
+
+  Models have two pricing-related fields:
+
+  - `:cost` - Legacy simple pricing (per-million-token rates for input/output/cache/reasoning)
+  - `:pricing` - Flexible component-based pricing with support for tokens, tools, images, storage
+
+  The `:cost` field is automatically converted to `:pricing.components` at load time
+  for backward compatibility. See `LLMDB.Pricing` and the [Pricing and Billing guide](pricing-and-billing.md).
   """
 
   @limits_schema Zoi.object(%{
@@ -26,6 +36,44 @@ defmodule LLMDB.Model do
                  input_video: Zoi.number() |> Zoi.nullish(),
                  output_video: Zoi.number() |> Zoi.nullish()
                })
+
+  @pricing_component_schema Zoi.object(%{
+                              id: Zoi.string(),
+                              kind:
+                                Zoi.enum([
+                                  "token",
+                                  "tool",
+                                  "image",
+                                  "storage",
+                                  "request",
+                                  "other"
+                                ])
+                                |> Zoi.nullish(),
+                              unit:
+                                Zoi.enum([
+                                  "token",
+                                  "call",
+                                  "query",
+                                  "session",
+                                  "gb_day",
+                                  "image",
+                                  "source",
+                                  "other"
+                                ])
+                                |> Zoi.nullish(),
+                              per: Zoi.integer() |> Zoi.min(1) |> Zoi.nullish(),
+                              rate: Zoi.number() |> Zoi.nullish(),
+                              meter: Zoi.string() |> Zoi.nullish(),
+                              tool: Zoi.union([Zoi.atom(), Zoi.string()]) |> Zoi.nullish(),
+                              size_class: Zoi.string() |> Zoi.nullish(),
+                              notes: Zoi.string() |> Zoi.nullish()
+                            })
+
+  @pricing_schema Zoi.object(%{
+                    currency: Zoi.string() |> Zoi.nullish(),
+                    components: Zoi.array(@pricing_component_schema) |> Zoi.default([]),
+                    merge: Zoi.enum(["replace", "merge_by_id"]) |> Zoi.default("merge_by_id")
+                  })
 
   @reasoning_schema Zoi.object(%{
                       enabled: Zoi.boolean() |> Zoi.nullish(),
@@ -103,6 +151,7 @@ defmodule LLMDB.Model do
              :base_url,
              :limits,
              :cost,
+             :pricing,
              :modalities,
              :capabilities,
              :tags,
@@ -127,6 +176,7 @@ defmodule LLMDB.Model do
               base_url: Zoi.string() |> Zoi.nullish(),
               limits: @limits_schema |> Zoi.nullish(),
               cost: @cost_schema |> Zoi.nullish(),
+              pricing: @pricing_schema |> Zoi.nullish(),
               modalities:
                 Zoi.object(%{
                   input: Zoi.array(Zoi.atom()) |> Zoi.nullish(),

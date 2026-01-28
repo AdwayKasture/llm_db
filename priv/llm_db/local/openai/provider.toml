@@ -14,3 +14,46 @@ exclude_models = [
   "o4-mini-deep-research",
   "codex-mini-latest"
 ]
+
+[pricing_defaults]
+currency = "USD"
+
+[[pricing_defaults.components]]
+id = "tool.web_search"
+kind = "tool"
+tool = "web_search"
+unit = "call"
+per = 1000
+rate = 10.0
+
+[[pricing_defaults.components]]
+id = "tool.web_search_preview"
+kind = "tool"
+tool = "web_search_preview"
+unit = "call"
+per = 1000
+rate = 10.0
+
+[[pricing_defaults.components]]
+id = "tool.file_search"
+kind = "tool"
+tool = "file_search"
+unit = "call"
+per = 1000
+rate = 2.5
+
+[[pricing_defaults.components]]
+id = "storage.file_search"
+kind = "storage"
+unit = "gb_day"
+per = 1
+rate = 0.10
+meter = "file_search_storage_gb_day"
+
+[[pricing_defaults.components]]
+id = "tool.code_interpreter"
+kind = "tool"
+tool = "code_interpreter"
+unit = "session"
+per = 1
+rate = 0.03

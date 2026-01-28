@@ -34,3 +34,14 @@ exclude_models = [
   "gemini-embedding-exp-03-07",
   "gemini-embedding-exp",
 ]
+
+[pricing_defaults]
+currency = "USD"
+
+[[pricing_defaults.components]]
+id = "tool.web_search"
+kind = "tool"
+tool = "web_search"
+unit = "call"
+per = 1000
+rate = 35.0

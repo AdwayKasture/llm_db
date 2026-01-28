@@ -36,3 +36,14 @@ exclude_models = [
   "claude-sonnet-4-5",
   "claude-sonnet-4.5"
 ]
+
+[pricing_defaults]
+currency = "USD"
+
+[[pricing_defaults.components]]
+id = "tool.web_search"
+kind = "tool"
+tool = "web_search"
+unit = "call"
+per = 1000
+rate = 10.0

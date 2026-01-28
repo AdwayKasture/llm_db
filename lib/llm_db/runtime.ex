@@ -182,6 +182,7 @@ defmodule LLMDB.Runtime do
           |> maybe_put(:env, Keyword.get(provider_config, :env))
           |> maybe_put(:config_schema, Keyword.get(provider_config, :config_schema))
           |> maybe_put(:doc, Keyword.get(provider_config, :doc))
+          |> maybe_put(:pricing_defaults, Keyword.get(provider_config, :pricing_defaults))
           |> maybe_put(:extra, Keyword.get(provider_config, :extra))
 
         # Extract models

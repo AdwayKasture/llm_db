@@ -198,7 +198,10 @@ defmodule LLMDB.Engine do
 
   # Stage 5: Finalize (Enrich → Nest)
   defp finalize(merged) do
-    models = Enrich.enrich_models(merged.models)
+    models =
+      merged.models
+      |> Enrich.enrich_models()
+
     nested_providers = build_nested_providers(merged.providers, models)
 
     snapshot = %{

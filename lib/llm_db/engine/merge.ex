@@ -163,6 +163,92 @@ defmodule LLMDB.Merge do
   end
 
   @doc """
+  Merges two lists of maps by a shared ID key.
+
+  Keeps the base list order, overrides items with matching IDs from the override list,
+  and appends override-only items in their original order.
+
+  Used by `LLMDB.Pricing` to merge pricing components from provider defaults
+  with model-specific overrides.
+
+  ## Parameters
+
+  - `base_list` - The base list of maps (order preserved)
+  - `override_list` - Maps that override or extend the base list
+  - `id_key` - The key to match on (default: `:id`). Supports both atom and string keys.
+
+  ## Examples
+
+      # Override matching items, preserve order
+      iex> base = [%{id: "a", value: 1}, %{id: "b", value: 2}]
+      iex> override = [%{id: "b", value: 20}]
+      iex> LLMDB.Merge.merge_list_by_id(base, override)
+      [%{id: "a", value: 1}, %{id: "b", value: 20}]
+
+      # Append new items from override
+      iex> base = [%{id: "a", value: 1}]
+      iex> override = [%{id: "b", value: 2}, %{id: "c", value: 3}]
+      iex> LLMDB.Merge.merge_list_by_id(base, override)
+      [%{id: "a", value: 1}, %{id: "b", value: 2}, %{id: "c", value: 3}]
+
+      # Pricing component merge example
+      iex> defaults = [%{id: "tool.search", rate: 10.0}, %{id: "tool.code", rate: 5.0}]
+      iex> overrides = [%{id: "tool.search", rate: 0.0}]  # Free search
+      iex> LLMDB.Merge.merge_list_by_id(defaults, overrides)
+      [%{id: "tool.search", rate: 0.0}, %{id: "tool.code", rate: 5.0}]
+  """
+  @spec merge_list_by_id([map()], [map()], atom() | String.t()) :: [map()]
+  def merge_list_by_id(base_list, override_list, id_key \\ :id)
+      when is_list(base_list) and is_list(override_list) do
+    base_ids =
+      base_list
+      |> Enum.map(&list_item_id(&1, id_key))
+      |> MapSet.new()
+
+    overrides =
+      override_list
+      |> Enum.reduce(%{}, fn item, acc ->
+        Map.put(acc, list_item_id(item, id_key), item)
+      end)
+
+    merged =
+      Enum.map(base_list, fn item ->
+        Map.get(overrides, list_item_id(item, id_key), item)
+      end)
+
+    extras =
+      Enum.filter(override_list, fn item ->
+        id = list_item_id(item, id_key)
+        not MapSet.member?(base_ids, id)
+      end)
+
+    merged ++ extras
+  end
+
+  defp list_item_id(item, id_key) when is_map(item) and is_atom(id_key) do
+    Map.get(item, id_key) || Map.get(item, Atom.to_string(id_key))
+  end
+
+  defp list_item_id(item, id_key) when is_map(item) and is_binary(id_key) do
+    Map.get(item, id_key) || map_get_existing_atom(item, id_key)
+  end
+
+  defp map_get_existing_atom(item, key) do
+    case to_existing_atom(key) do
+      {:ok, atom} -> Map.get(item, atom)
+      :error -> nil
+    end
+  end
+
+  defp to_existing_atom(key) do
+    try do
+      {:ok, String.to_existing_atom(key)}
+    rescue
+      ArgumentError -> :error
+    end
+  end
+
+  @doc """
   Compiles exclude patterns to regex for performance.
 
   Converts a map of %{provider => [patterns]} to %{provider => [compiled_patterns]}

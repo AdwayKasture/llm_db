@@ -16,3 +16,46 @@ exclude_models = [
   "grok-2-vision-1212",
   "grok-2-vision-latest"
 ]
+
+[pricing_defaults]
+currency = "USD"
+
+[[pricing_defaults.components]]
+id = "tool.web_search"
+kind = "tool"
+tool = "web_search"
+unit = "call"
+per = 1000
+rate = 5.0
+
+[[pricing_defaults.components]]
+id = "tool.x_search"
+kind = "tool"
+tool = "x_search"
+unit = "call"
+per = 1000
+rate = 5.0
+
+[[pricing_defaults.components]]
+id = "tool.code_execution"
+kind = "tool"
+tool = "code_execution"
+unit = "call"
+per = 1000
+rate = 5.0
+
+[[pricing_defaults.components]]
+id = "tool.document_search"
+kind = "tool"
+tool = "document_search"
+unit = "call"
+per = 1000
+rate = 5.0
+
+[[pricing_defaults.components]]
+id = "tool.collections_search"
+kind = "tool"
+tool = "collections_search"
+unit = "call"
+per = 1000
+rate = 2.5

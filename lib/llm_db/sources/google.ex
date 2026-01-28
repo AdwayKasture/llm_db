@@ -32,8 +32,6 @@ defmodule LLMDB.Sources.Google do
 
   @behaviour LLMDB.Source
 
-  require Logger
-
   @default_url "https://generativelanguage.googleapis.com/v1beta/models"
   @default_cache_dir "priv/llm_db/remote"
 

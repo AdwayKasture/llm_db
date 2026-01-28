@@ -34,8 +34,6 @@ defmodule LLMDB.Sources.Anthropic do
 
   @behaviour LLMDB.Source
 
-  require Logger
-
   @default_url "https://api.anthropic.com/v1/models"
   @default_cache_dir "priv/llm_db/remote"
   @default_version "2023-06-01"

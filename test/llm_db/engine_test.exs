@@ -1,13 +1,22 @@
 defmodule LLMDB.EngineTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
 
   alias LLMDB.Engine
 
   setup do
-    # Clear any polluted application env
+    original_config = Application.get_all_env(:llm_db)
+
     Application.delete_env(:llm_db, :allow)
     Application.delete_env(:llm_db, :deny)
     Application.delete_env(:llm_db, :prefer)
+
+    on_exit(fn ->
+      Application.delete_env(:llm_db, :allow)
+      Application.delete_env(:llm_db, :deny)
+      Application.delete_env(:llm_db, :prefer)
+      Application.put_all_env(llm_db: original_config)
+    end)
+
     :ok
   end
 
@@ -98,6 +107,35 @@ defmodule LLMDB.EngineTest do
           assert Enum.all?(models_list, fn m -> m.provider == provider_id end)
         end
       end
+    end
+
+    test "does not apply provider pricing defaults at build time" do
+      overrides = %{
+        providers: [
+          %{
+            id: :test_provider,
+            pricing_defaults: %{
+              currency: "USD",
+              components: [
+                %{id: "token.input", kind: "token", unit: "token", per: 1_000_000, rate: 1.0}
+              ]
+            }
+          }
+        ],
+        models: [
+          %{
+            id: "test-model",
+            provider: :test_provider,
+            capabilities: %{chat: true}
+          }
+        ]
+      }
+
+      sources = [{LLMDB.Sources.Config, %{overrides: overrides}}]
+      {:ok, snapshot} = Engine.run(sources: sources)
+
+      model = snapshot.providers[:test_provider].models["test-model"]
+      assert model.pricing == nil
     end
 
     test "accepts config override" do

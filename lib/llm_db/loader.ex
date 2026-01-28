@@ -9,7 +9,7 @@ defmodule LLMDB.Loader do
   LLMDB module focused on the query API.
   """
 
-  alias LLMDB.{Engine, Merge, Model, Provider, Runtime}
+  alias LLMDB.{Engine, Merge, Model, Pricing, Provider, Runtime}
 
   require Logger
 
@@ -53,9 +53,11 @@ defmodule LLMDB.Loader do
          runtime <- Runtime.compile(opts ++ [provider_ids: Enum.map(providers, & &1.id)]),
          :ok <- warn_unknown_providers(runtime.unknown, providers),
          {providers2, models2} <- merge_custom({providers, models}, runtime.custom),
-         filtered_models <- Engine.apply_filters(models2, runtime.filters),
+         models3 <- Pricing.apply_cost_components(models2),
+         models4 <- Pricing.apply_provider_defaults(providers2, models3),
+         filtered_models <- Engine.apply_filters(models4, runtime.filters),
          :ok <- validate_not_empty(filtered_models, runtime),
-         snapshot <- build_snapshot(providers2, filtered_models, models2, runtime, generated_at) do
+         snapshot <- build_snapshot(providers2, filtered_models, models4, runtime, generated_at) do
       {:ok, snapshot}
     end
   end

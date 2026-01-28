@@ -7,10 +7,17 @@ defmodule LLMDB.ConsumerFilteringTest do
     # Save original config
     original_config = Application.get_all_env(:llm_db)
 
+    Application.delete_env(:llm_db, :allow)
+    Application.delete_env(:llm_db, :deny)
+    Application.delete_env(:llm_db, :prefer)
+
     on_exit(fn ->
       # Clear test config
       Application.delete_env(:llm_db, :filter)
       Application.delete_env(:llm_db, :custom)
+      Application.delete_env(:llm_db, :allow)
+      Application.delete_env(:llm_db, :deny)
+      Application.delete_env(:llm_db, :prefer)
 
       # Restore original config
       Application.put_all_env(llm_db: original_config)
